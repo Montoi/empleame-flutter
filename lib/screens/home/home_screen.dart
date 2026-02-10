@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:empleame/widgets/common/section_header.dart';
 import 'package:empleame/widgets/home/app_header.dart';
 import 'package:empleame/widgets/home/search_bar_widget.dart';
@@ -42,7 +43,7 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: SectionHeader(
                 title: 'Ofertas Especiales',
-                onSeeAll: () {},
+                onSeeAll: () => context.push('/special-offers'),
               ),
             ),
 
@@ -56,16 +57,19 @@ class HomeScreen extends StatelessWidget {
 
             // Services Section
             SliverToBoxAdapter(
-              child: SectionHeader(title: 'Servicios', onSeeAll: () {}),
+              child: SectionHeader(
+                title: 'Servicios',
+                onSeeAll: () => context.push('/all-services'),
+              ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 8)),
 
             SliverToBoxAdapter(
               child: ServicesGrid(
-                services: _convertServices(),
+                services: _convertServices().take(7).toList(),
                 onServiceTap: (index) {
-                  // Handle service tap
+                  // TODO: Navigate to popular-services with category filter
                 },
               ),
             ),
@@ -76,7 +80,7 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: SectionHeader(
                 title: 'Servicios Más Populares',
-                onSeeAll: () {},
+                onSeeAll: () => context.push('/popular-services'),
               ),
             ),
 
@@ -85,7 +89,7 @@ class HomeScreen extends StatelessWidget {
             SliverToBoxAdapter(
               child: PopularServicesSection(
                 categories: categories,
-                services: _convertPopularServices(),
+                services: _convertPopularServices().take(5).toList(),
               ),
             ),
 

@@ -20,6 +20,18 @@ class MyApp extends StatelessWidget {
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: Colors.white,
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.white,
+          foregroundColor: Color(0xFF1F222A),
+          elevation: 0,
+          surfaceTintColor: Colors.white,
+        ),
+        navigationBarTheme: NavigationBarThemeData(
+          backgroundColor: Colors.white,
+          indicatorColor: const Color(0xFF7210FF).withValues(alpha: 0.15),
+          elevation: 0,
+          surfaceTintColor: Colors.white,
+        ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -29,7 +41,7 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFF181A20),
       ),
-      themeMode: ThemeMode.system,
+      themeMode: ThemeMode.light,
       routerConfig: goRouter,
     );
   }

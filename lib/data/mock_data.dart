@@ -215,17 +215,6 @@ const popularServices = [
     image: 'https://images.unsplash.com/photo-1562564055-71e051d33c19?w=400',
     isBookmarked: false,
   ),
-  PopularService(
-    id: '6',
-    title: 'Full House Painting',
-    category: 'Painting',
-    provider: 'Frederic Denney',
-    price: 150,
-    rating: 4.9,
-    reviewCount: 1205,
-    image: 'https://images.unsplash.com/photo-1589939705384-5185138a047a?w=400',
-    isBookmarked: false,
-  ),
   // More services...
   PopularService(
     id: '7',

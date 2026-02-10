@@ -74,7 +74,7 @@ class _OfferCarouselState extends State<OfferCarousel> {
                     ),
                     // Content
                     Padding(
-                      padding: const EdgeInsets.all(24),
+                      padding: const EdgeInsets.all(18),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -87,7 +87,6 @@ class _OfferCarouselState extends State<OfferCarousel> {
                               fontWeight: FontWeight.w900,
                             ),
                           ),
-                          const SizedBox(height: 4),
                           Text(
                             offer.title,
                             style: const TextStyle(
@@ -96,7 +95,7 @@ class _OfferCarouselState extends State<OfferCarousel> {
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 2),
                           SizedBox(
                             width: 200,
                             child: Text(
