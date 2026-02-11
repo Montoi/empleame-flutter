@@ -106,7 +106,7 @@ class _NotificationSettingsScreenState
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF7210FF),
+            activeTrackColor: const Color(0xFF7210FF),
           ),
         ],
       ),

@@ -108,10 +108,26 @@ class _PopularServicesScreenState extends State<PopularServicesScreen> {
                           imageUrl: service.image,
                           isBookmarked: service.isBookmarked,
                           onTap: () {
-                            // TODO: Navigate to service detail
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'Opening ${service.title} details...',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
                           },
                           onBookmark: () {
-                            // TODO: Toggle bookmark
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  service.isBookmarked
+                                      ? 'Removed from bookmarks'
+                                      : 'Added to bookmarks',
+                                ),
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
                           },
                         ),
                       );

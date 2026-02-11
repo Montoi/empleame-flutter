@@ -334,7 +334,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               Switch(
                 value: switchValue,
                 onChanged: onSwitchChanged,
-                activeColor: const Color(0xFF7210FF),
+                activeTrackColor: const Color(0xFF7210FF),
               )
             else
               const Icon(

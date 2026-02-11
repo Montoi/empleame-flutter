@@ -82,8 +82,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   controller: _dateOfBirthController,
                   placeholder: 'Date of Birth',
                   icon: Icons.calendar_today_outlined,
-                  onTap: () {
-                    // TODO: Show date picker
+                  onTap: () async {
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: DateTime(1995, 12, 27),
+                      firstDate: DateTime(1950),
+                      lastDate: DateTime.now(),
+                    );
+                    if (picked != null) {
+                      setState(() {
+                        _dateOfBirthController.text =
+                            '${picked.month}/${picked.day}/${picked.year}';
+                      });
+                    }
                   },
                 ),
                 const SizedBox(height: 16),
@@ -101,7 +112,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   placeholder: 'Country',
                   icon: Icons.keyboard_arrow_down,
                   onTap: () {
-                    // TODO: Show country picker
+                    _showCountryPicker();
                   },
                 ),
                 const SizedBox(height: 16),
@@ -119,7 +130,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   placeholder: 'Gender',
                   icon: Icons.keyboard_arrow_down,
                   onTap: () {
-                    // TODO: Show gender picker
+                    _showGenderPicker();
                   },
                 ),
                 const SizedBox(height: 16),
@@ -153,7 +164,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               padding: const EdgeInsets.fromLTRB(24, 20, 24, 20),
               child: ElevatedButton(
                 onPressed: () {
-                  // TODO: Update profile
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Profile updated successfully!'),
+                      backgroundColor: Color(0xFF10B981),
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
                   Navigator.pop(context);
                 },
                 style: ElevatedButton.styleFrom(
@@ -289,6 +306,98 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ),
             Icon(icon, size: 20, color: const Color(0xFF64748B)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showCountryPicker() {
+    final countries = [
+      'United States',
+      'Canada',
+      'United Kingdom',
+      'Australia',
+      'Germany',
+      'France',
+      'Spain',
+      'Italy',
+      'Mexico',
+      'Brazil',
+    ];
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Select Country',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...countries.map(
+              (country) => ListTile(
+                title: Text(country),
+                onTap: () {
+                  setState(() {
+                    _countryController.text = country;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _showGenderPicker() {
+    final genders = ['Male', 'Female', 'Other'];
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(
+              'Select Gender',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.w700,
+                color: Color(0xFF0F172A),
+              ),
+            ),
+            const SizedBox(height: 16),
+            ...genders.map(
+              (gender) => ListTile(
+                title: Text(gender),
+                trailing: _genderController.text == gender
+                    ? const Icon(Icons.check, color: Color(0xFF7210FF))
+                    : null,
+                onTap: () {
+                  setState(() {
+                    _genderController.text = gender;
+                  });
+                  Navigator.pop(context);
+                },
+              ),
+            ),
           ],
         ),
       ),

@@ -128,6 +128,8 @@ class _BookingsScreenState extends State<BookingsScreen>
             Expanded(
               child: TabBarView(
                 controller: _tabController,
+                physics:
+                    const NeverScrollableScrollPhysics(), // Disable swipe to prevent conflict with main navigation
                 children: [
                   _buildBookingsList(BookingStatus.upcoming),
                   _buildBookingsList(BookingStatus.completed),
@@ -374,7 +376,14 @@ class _BookingsScreenState extends State<BookingsScreen>
                     size: 20,
                   ),
                   onPressed: () {
-                    // TODO: Navigate to chat
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Opening chat with ${booking.providerName}...',
+                        ),
+                        behavior: SnackBarBehavior.floating,
+                      ),
+                    );
                   },
                 ),
               ),

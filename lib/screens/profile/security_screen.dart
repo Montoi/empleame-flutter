@@ -199,7 +199,7 @@ class _SecurityScreenState extends State<SecurityScreen> {
               Switch(
                 value: switchValue,
                 onChanged: onSwitchChanged,
-                activeColor: const Color(0xFF7210FF),
+                activeTrackColor: const Color(0xFF7210FF),
               )
             else
               const Icon(

@@ -69,7 +69,8 @@ class HomeScreen extends StatelessWidget {
               child: ServicesGrid(
                 services: _convertServices().take(7).toList(),
                 onServiceTap: (index) {
-                  // TODO: Navigate to popular-services with category filter
+                  final service = _convertServices().toList()[index];
+                  context.push('/popular-services?category=${service.label}');
                 },
               ),
             ),
