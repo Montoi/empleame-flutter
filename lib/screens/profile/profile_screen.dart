@@ -6,9 +6,12 @@ import 'package:empleame/screens/profile/language_screen.dart';
 import 'package:empleame/screens/profile/payment_methods_screen.dart';
 import 'package:empleame/screens/profile/privacy_policy_screen.dart';
 import 'package:empleame/screens/profile/help_center_screen.dart';
+import 'package:empleame/services/auth_service.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final AuthService? authService;
+
+  const ProfileScreen({super.key, this.authService});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -148,7 +151,37 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.logout,
                       title: 'Logout',
                       isDestructive: true,
-                      onTap: () {},
+                      onTap: () async {
+                        // Show confirmation dialog
+                        final shouldLogout = await showDialog<bool>(
+                          context: context,
+                          builder: (context) => AlertDialog(
+                            title: const Text('Logout'),
+                            content: const Text(
+                              'Are you sure you want to logout?',
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, false),
+                                child: const Text('Cancel'),
+                              ),
+                              TextButton(
+                                onPressed: () => Navigator.pop(context, true),
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFFEF4444),
+                                ),
+                                child: const Text('Logout'),
+                              ),
+                            ],
+                          ),
+                        );
+
+                        if (shouldLogout == true &&
+                            widget.authService != null) {
+                          await widget.authService!.signOut();
+                          // Router will handle navigation to welcome screen
+                        }
+                      },
                     ),
                     const SizedBox(height: 40),
                   ],

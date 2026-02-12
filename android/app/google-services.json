@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1095778627171",
+    "project_id": "empleame-c167c",
+    "storage_bucket": "empleame-c167c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095778627171:android:b9f82b167643969c1d1256",
+        "android_client_info": {
+          "package_name": "com.example.empleame"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA6iCvWyLSf45LvWTLoErlkYc7r-qRstrA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

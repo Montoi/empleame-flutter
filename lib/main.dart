@@ -1,12 +1,42 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'config/router.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'services/auth_service.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
+
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
+
+  runApp(MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+  MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  late final AuthService _authService;
+  late final ValueNotifier<AuthService> authServiceNotifier;
+
+  @override
+  void initState() {
+    super.initState();
+    _authService = AuthService();
+    authServiceNotifier = ValueNotifier(_authService);
+  }
+
+  @override
+  void dispose() {
+    authServiceNotifier.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +72,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: const Color(0xFF181A20),
       ),
       themeMode: ThemeMode.light,
-      routerConfig: goRouter,
+      routerConfig: createRouter(_authService),
     );
   }
 }

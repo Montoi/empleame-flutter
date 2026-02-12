@@ -3,9 +3,12 @@ import 'package:empleame/screens/home/home_screen.dart';
 import 'package:empleame/screens/bookings/bookings_screen.dart';
 import 'package:empleame/screens/referrals/referrals_screen.dart';
 import 'package:empleame/screens/profile/profile_screen.dart';
+import 'package:empleame/services/auth_service.dart';
 
 class BottomNavScaffold extends StatefulWidget {
-  const BottomNavScaffold({super.key});
+  final AuthService? authService;
+
+  const BottomNavScaffold({super.key, this.authService});
 
   @override
   State<BottomNavScaffold> createState() => _BottomNavScaffoldState();
@@ -16,17 +19,18 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
   int _currentIndex = 0;
 
   // List of screens for PageView
-  final List<Widget> _screens = const [
-    HomeScreen(),
-    BookingsScreen(),
-    ReferralsScreen(),
-    ProfileScreen(),
-  ];
+  late final List<Widget> _screens;
 
   @override
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: _currentIndex);
+    _screens = [
+      const HomeScreen(),
+      const BookingsScreen(),
+      const ReferralsScreen(),
+      ProfileScreen(authService: widget.authService),
+    ];
   }
 
   @override
