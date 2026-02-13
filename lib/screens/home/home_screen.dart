@@ -83,10 +83,33 @@ class HomeScreen extends StatelessWidget {
 
             SliverToBoxAdapter(
               child: ServicesGrid(
-                services: _convertServices().take(7).toList(),
+                services: [
+                  ..._convertServices().take(7),
+                  _convertServices().firstWhere(
+                    (s) => s.label == 'More',
+                    orElse: () => _convertServices().last,
+                  ),
+                ],
                 onServiceTap: (index) {
-                  final service = _convertServices().toList()[index];
-                  context.push('/popular-services?category=${service.label}');
+                  final displayedServices = [
+                    ..._convertServices().take(7),
+                    _convertServices().firstWhere(
+                      (s) => s.label == 'More',
+                      orElse: () => _convertServices().last,
+                    ),
+                  ];
+                  final service = displayedServices[index];
+
+                  if (service.label == 'More') {
+                    context.push('/all-services');
+                    return;
+                  }
+
+                  final uri = Uri(
+                    path: '/popular-services',
+                    queryParameters: {'category': service.label},
+                  );
+                  context.push(uri.toString());
                 },
               ),
             ),

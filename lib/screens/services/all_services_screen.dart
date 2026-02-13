@@ -57,16 +57,23 @@ class AllServicesScreen extends StatelessWidget {
           mainAxisSpacing: 32,
           childAspectRatio: 0.85,
         ),
-        itemCount: services.length,
+        itemCount: services.where((s) => s.name != 'More').length,
         itemBuilder: (context, index) {
-          final service = services[index];
+          final service = services
+              .where((s) => s.name != 'More')
+              .toList()[index];
           return ServiceIconItem(
             icon: IconMapper.getIcon(service.icon),
             label: service.name,
             color: IconMapper.parseColor(service.iconColor),
             onTap: () {
               // Navigate to popular services filtered by this category
-              context.push('/popular-services?category=${service.name}');
+              // Using Uri to properly encode parameters (handles special chars like ' & spaces)
+              final uri = Uri(
+                path: '/popular-services',
+                queryParameters: {'category': service.name},
+              );
+              context.push(uri.toString());
             },
           );
         },
