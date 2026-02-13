@@ -9,6 +9,7 @@ import 'package:empleame/widgets/home/popular_services_section.dart';
 import 'package:empleame/data/mock_data.dart';
 import 'package:empleame/utils/icon_mapper.dart';
 import 'package:empleame/screens/profile/notifications_screen.dart';
+import 'package:empleame/screens/home/bookmarks_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -33,7 +34,14 @@ class HomeScreen extends StatelessWidget {
                     ),
                   );
                 },
-                onBookmarkTap: () {},
+                onBookmarkTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const BookmarksScreen(),
+                    ),
+                  );
+                },
               ),
             ),
 
