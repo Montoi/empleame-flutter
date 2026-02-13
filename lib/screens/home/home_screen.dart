@@ -8,6 +8,7 @@ import 'package:empleame/widgets/home/services_grid.dart';
 import 'package:empleame/widgets/home/popular_services_section.dart';
 import 'package:empleame/data/mock_data.dart';
 import 'package:empleame/utils/icon_mapper.dart';
+import 'package:empleame/screens/profile/notifications_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -24,7 +25,14 @@ class HomeScreen extends StatelessWidget {
                 userName: userData.name,
                 greeting: userData.greeting,
                 profileImageUrl: userData.avatar,
-                onNotificationTap: () {},
+                onNotificationTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const NotificationsScreen(),
+                    ),
+                  );
+                },
                 onBookmarkTap: () {},
               ),
             ),
