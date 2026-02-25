@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:empleame/services/auth_service.dart';
+import 'package:empleame/services/google_sign_in_service.dart';
 
 class SignUpScreen extends StatefulWidget {
   final AuthService authService;
@@ -18,6 +19,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   bool _isPasswordVisible = false;
   bool _rememberMe = false;
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   String? _errorMessage;
 
   @override
@@ -47,6 +49,38 @@ class _SignUpScreenState extends State<SignUpScreen> {
       setState(() {
         _errorMessage = e.toString();
         _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final result = await GoogleSignInService.signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _isGoogleLoading = false);
+      if (result == null) return; // user cancelled
+      // Navigation handled by router redirect on auth state change
+    } catch (e) {
+      if (!mounted) return;
+      String message = 'Google sign-in failed. Please try again.';
+      final errorStr = e.toString();
+      if (errorStr.contains('sign_in_cancelled') ||
+          errorStr.contains('network_error')) {
+        message = 'Sign-in was cancelled or network error occurred.';
+      } else if (errorStr.contains('10') ||
+          errorStr.contains('developer_error')) {
+        message =
+            'Developer error (code 10): SHA-1 may not match Firebase config.';
+      } else {
+        message = 'Error: $errorStr';
+      }
+      setState(() {
+        _errorMessage = message;
+        _isGoogleLoading = false;
       });
     }
   }
@@ -312,17 +346,28 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     _SocialButton(
-                      iconWidget: const Text(
-                        'G',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4285F4),
-                        ),
-                      ),
-                      onTap: () {
-                        // TODO: Implement Google sign-in
-                      },
+                      iconWidget: _isGoogleLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4285F4),
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'G',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4285F4),
+                              ),
+                            ),
+                      onTap: (_isLoading || _isGoogleLoading)
+                          ? () {}
+                          : _handleGoogleSignIn,
                     ),
                     const SizedBox(width: 16),
                     _SocialButton(

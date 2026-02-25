@@ -1,8 +1,48 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:empleame/services/google_sign_in_service.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
+
+  @override
+  State<WelcomeScreen> createState() => _WelcomeScreenState();
+}
+
+class _WelcomeScreenState extends State<WelcomeScreen> {
+  bool _isGoogleLoading = false;
+  String? _errorMessage;
+
+  Future<void> _handleGoogleSignIn() async {
+    setState(() {
+      _isGoogleLoading = true;
+      _errorMessage = null;
+    });
+    try {
+      final result = await GoogleSignInService.signInWithGoogle();
+      if (!mounted) return;
+      setState(() => _isGoogleLoading = false);
+      if (result == null) return; // user cancelled
+    } catch (e) {
+      if (!mounted) return;
+      String message = 'Google sign-in failed. Please try again.';
+      final errorStr = e.toString();
+      if (errorStr.contains('sign_in_cancelled') ||
+          errorStr.contains('network_error')) {
+        message = 'Sign-in was cancelled or network error occurred.';
+      } else if (errorStr.contains('10') ||
+          errorStr.contains('developer_error')) {
+        message =
+            'Developer error (code 10): SHA-1 may not match Firebase config.';
+      } else {
+        message = 'Error: $errorStr';
+      }
+      setState(() {
+        _errorMessage = message;
+        _isGoogleLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -134,17 +174,37 @@ class WelcomeScreen extends StatelessWidget {
                     const SizedBox(height: 12),
 
                     _SocialLoginButton(
-                      iconWidget: const Text(
-                        'G',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF4285F4),
-                        ),
-                      ),
+                      iconWidget: _isGoogleLoading
+                          ? const SizedBox(
+                              width: 24,
+                              height: 24,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Color(0xFF4285F4),
+                                ),
+                              ),
+                            )
+                          : const Text(
+                              'G',
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF4285F4),
+                              ),
+                            ),
                       text: 'Continue with Google',
-                      onTap: () {},
+                      onTap: _isGoogleLoading ? () {} : _handleGoogleSignIn,
                     ),
+
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 8),
+                      Text(
+                        _errorMessage!,
+                        style: const TextStyle(color: Colors.red, fontSize: 13),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
 
                     const SizedBox(height: 12),
 
