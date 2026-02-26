@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:empleame/models/user_model.dart';
+import 'package:empleame/services/user_repository.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
+  final UserRepository _userRepository = UserRepository();
 
   // Get current user
   User? get currentUser => _firebaseAuth.currentUser;
@@ -24,16 +27,34 @@ class AuthService {
     }
   }
 
-  // Create account with email and password
+  // Create account with email and password — also creates Firestore user doc.
   Future<UserCredential> signUp({
     required String email,
     required String password,
   }) async {
     try {
-      return await _firebaseAuth.createUserWithEmailAndPassword(
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
+
+      // Atomically create the Firestore document (fire-and-forget; auth succeeds
+      // even if Firestore write fails, and watchUser stream fills in later).
+      _userRepository
+          .createUser(
+            AppUser(
+              uid: credential.user!.uid,
+              displayName: credential.user?.displayName ?? '',
+              email: email,
+              photoUrl: credential.user?.photoURL ?? '',
+              role: UserRole.client,
+            ),
+          )
+          .catchError(
+            (e) => print('AuthService: Firestore createUser failed: $e'),
+          );
+
+      return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }

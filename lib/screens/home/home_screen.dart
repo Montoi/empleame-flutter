@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:empleame/providers/providers.dart';
 import 'package:empleame/widgets/common/section_header.dart';
 import 'package:empleame/widgets/home/app_header.dart';
 import 'package:empleame/widgets/home/search_bar_widget.dart';
@@ -11,21 +13,36 @@ import 'package:empleame/utils/icon_mapper.dart';
 import 'package:empleame/screens/profile/notifications_screen.dart';
 import 'package:empleame/screens/home/bookmarks_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(currentUserStreamProvider);
+    final user = userAsync.valueOrNull;
+
+    // Compute a time-based greeting
+    final hour = DateTime.now().hour;
+    final greeting = hour < 12
+        ? 'Buenos días'
+        : hour < 18
+        ? 'Buenas tardes'
+        : 'Buenas noches';
+
     return Scaffold(
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // Header
+            // Header — real user data from Firestore
             SliverToBoxAdapter(
               child: AppHeader(
-                userName: userData.name,
-                greeting: userData.greeting,
-                profileImageUrl: userData.avatar,
+                userName: user?.displayName.isNotEmpty == true
+                    ? user!.displayName
+                    : 'Bienvenido',
+                greeting: greeting,
+                profileImageUrl: user?.photoUrl.isNotEmpty == true
+                    ? user!.photoUrl
+                    : null,
                 onNotificationTap: () {
                   Navigator.push(
                     context,
@@ -53,7 +70,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 16)),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             // Special Offers Section
             SliverToBoxAdapter(
@@ -63,13 +80,13 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             const SliverToBoxAdapter(
               child: OfferCarousel(offers: specialOffers),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
             // Services Section
             SliverToBoxAdapter(
@@ -79,7 +96,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             SliverToBoxAdapter(
               child: ServicesGrid(
@@ -114,7 +131,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 24)),
+            const SliverToBoxAdapter(child: SizedBox(height: 12)),
 
             // Popular Services Section
             SliverToBoxAdapter(
@@ -124,7 +141,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 8)),
+            const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             SliverToBoxAdapter(
               child: PopularServicesSection(
@@ -133,7 +150,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 100)),
+            const SliverToBoxAdapter(child: SizedBox(height: 80)),
           ],
         ),
       ),

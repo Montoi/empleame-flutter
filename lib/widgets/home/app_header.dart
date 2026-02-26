@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class AppHeader extends StatelessWidget {
@@ -19,7 +20,7 @@ class AppHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
       child: Row(
         children: [
           // Profile Image
@@ -28,16 +29,27 @@ class AppHeader extends StatelessWidget {
             backgroundColor: Theme.of(
               context,
             ).colorScheme.primary.withValues(alpha: 0.1),
-            backgroundImage: profileImageUrl != null
-                ? NetworkImage(profileImageUrl!)
-                : null,
-            child: profileImageUrl == null
-                ? Icon(
+            child: profileImageUrl != null && profileImageUrl!.isNotEmpty
+                ? ClipOval(
+                    child: CachedNetworkImage(
+                      imageUrl: profileImageUrl!,
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      placeholder: (ctx, url) =>
+                          const CircularProgressIndicator(strokeWidth: 2),
+                      errorWidget: (ctx, url, err) => Icon(
+                        Icons.person,
+                        color: Theme.of(context).colorScheme.primary,
+                        size: 28,
+                      ),
+                    ),
+                  )
+                : Icon(
                     Icons.person,
                     color: Theme.of(context).colorScheme.primary,
                     size: 28,
-                  )
-                : null,
+                  ),
           ),
           const SizedBox(width: 12),
           // Greeting and Name

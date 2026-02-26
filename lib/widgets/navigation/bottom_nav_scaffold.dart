@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:empleame/screens/home/home_screen.dart';
 import 'package:empleame/screens/bookings/bookings_screen.dart';
@@ -59,6 +60,12 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
+        // DragStartBehavior.down: gesture tracking starts from first touch,
+        // so the page settles faster and releases the gesture arena sooner.
+        dragStartBehavior: DragStartBehavior.down,
+        // ClampingScrollPhysics: page snaps sharply with no elastic bounce,
+        // releasing vertical scroll in the new tab immediately.
+        physics: const PageScrollPhysics(parent: ClampingScrollPhysics()),
         children: _screens,
       ),
       bottomNavigationBar: NavigationBar(

@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:empleame/models/home_models.dart';
 
@@ -29,9 +30,15 @@ class _OfferCarouselState extends State<OfferCarousel> {
     return Column(
       children: [
         SizedBox(
-          height: 180,
+          height: 175,
           child: PageView.builder(
             controller: _pageController,
+            // Start tracking from the first touch — page settles faster
+            // so the gesture arena is released sooner for vertical scrolling.
+            dragStartBehavior: DragStartBehavior.down,
+            // ClampingScrollPhysics removes elastic overshoot so the page
+            // snaps to position immediately, releasing vertical scroll faster.
+            physics: const PageScrollPhysics(parent: ClampingScrollPhysics()),
             onPageChanged: (index) {
               setState(() {
                 _currentPage = index;
@@ -117,7 +124,7 @@ class _OfferCarouselState extends State<OfferCarousel> {
             },
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 8),
         // Page Indicators
         Row(
           mainAxisAlignment: MainAxisAlignment.center,

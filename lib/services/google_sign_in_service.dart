@@ -1,10 +1,12 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:empleame/models/user_model.dart';
+import 'package:empleame/services/user_repository.dart';
 
 // Google Sign-In Service Class
 class GoogleSignInService {
   static final FirebaseAuth _auth = FirebaseAuth.instance;
+  static final UserRepository _userRepository = UserRepository();
 
   // GoogleSignIn instance with Web Client ID for idToken generation
   static final GoogleSignIn _googleSignIn = GoogleSignIn(
@@ -49,35 +51,27 @@ class GoogleSignInService {
         credential,
       );
 
-      // Save user profile to Firestore in the background.
-      // This must NOT block or throw — auth succeeds independently of Firestore.
-      _saveUserToFirestore(userCredential.user).catchError((e) {
-        print('GoogleSignInService: Firestore save failed (non-fatal): $e');
-      });
+      // Save user to Firestore via repository (only on first sign-in).
+      // Use googleUser directly — userCredential.user?.displayName can be null
+      // on Android before the Firebase profile syncs from Google servers.
+      _userRepository
+          .createUser(
+            AppUser(
+              uid: userCredential.user!.uid,
+              displayName: googleUser.displayName ?? '',
+              email: googleUser.email,
+              photoUrl: googleUser.photoUrl ?? '',
+              role: UserRole.client,
+            ),
+          )
+          .catchError((e) {
+            print('GoogleSignInService: Firestore save failed (non-fatal): $e');
+          });
 
       return userCredential;
     } catch (e) {
       print('GoogleSignInService error: $e');
       rethrow;
-    }
-  }
-
-  // Save user profile to Firestore (only on first sign-in)
-  static Future<void> _saveUserToFirestore(User? user) async {
-    if (user == null) return;
-    final userDoc = FirebaseFirestore.instance
-        .collection('users')
-        .doc(user.uid);
-    final docSnapshot = await userDoc.get();
-    if (!docSnapshot.exists) {
-      await userDoc.set({
-        'uid': user.uid,
-        'name': user.displayName ?? '',
-        'email': user.email ?? '',
-        'photoURL': user.photoURL ?? '',
-        'provider': 'google',
-        'createdAt': FieldValue.serverTimestamp(),
-      });
     }
   }
 

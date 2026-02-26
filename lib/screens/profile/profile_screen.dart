@@ -1,4 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:empleame/providers/providers.dart';
 import 'package:empleame/screens/profile/edit_profile_screen.dart';
 import 'package:empleame/screens/profile/notification_settings_screen.dart';
 import 'package:empleame/screens/profile/security_screen.dart';
@@ -8,29 +11,28 @@ import 'package:empleame/screens/profile/privacy_policy_screen.dart';
 import 'package:empleame/screens/profile/help_center_screen.dart';
 import 'package:empleame/services/auth_service.dart';
 
-class ProfileScreen extends StatefulWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   final AuthService? authService;
 
   const ProfileScreen({super.key, this.authService});
 
   @override
-  State<ProfileScreen> createState() => _ProfileScreenState();
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
 }
 
-class _ProfileScreenState extends State<ProfileScreen> {
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   bool _isDarkMode = false;
 
   @override
   Widget build(BuildContext context) {
+    final userAsync = ref.watch(currentUserStreamProvider);
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header Toolbar
             _buildHeader(),
-
-            // Scrollable content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -38,109 +40,119 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     const SizedBox(height: 16),
 
-                    // Profile Section
-                    _buildProfileSection(),
+                    // Profile Section — reactive to Firestore
+                    userAsync.when(
+                      data: (user) => _buildProfileSection(
+                        displayName: user?.displayName ?? '',
+                        email: user?.email ?? '',
+                        photoUrl: user?.photoUrl ?? '',
+                      ),
+                      loading: () => const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 40),
+                        child: CircularProgressIndicator(),
+                      ),
+                      error: (e, _) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        child: Column(
+                          children: [
+                            const Icon(
+                              Icons.error_outline,
+                              color: Colors.red,
+                              size: 40,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              e.toString().contains('permission')
+                                  ? 'No tienes permiso para ver este perfil.'
+                                  : 'Error al cargar el perfil.',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(color: Colors.red),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                     const SizedBox(height: 24),
 
                     _buildDivider(),
-
-                    // Menu Items
                     _buildMenuItem(
                       icon: Icons.person_outline,
                       title: 'Edit Profile',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const EditProfileScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const EditProfileScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.notifications_outlined,
                       title: 'Notification',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                const NotificationSettingsScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const NotificationSettingsScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.account_balance_wallet_outlined,
                       title: 'Payment',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PaymentMethodsScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PaymentMethodsScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.shield_outlined,
                       title: 'Security',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const SecurityScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const SecurityScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.language,
                       title: 'Language',
                       value: 'English (US)',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LanguageScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const LanguageScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.remove_red_eye_outlined,
                       title: 'Dark Mode',
                       hasSwitch: true,
                       switchValue: _isDarkMode,
-                      onSwitchChanged: (value) {
-                        setState(() {
-                          _isDarkMode = value;
-                        });
-                      },
+                      onSwitchChanged: (value) =>
+                          setState(() => _isDarkMode = value),
                     ),
                     _buildMenuItem(
                       icon: Icons.lock_outline,
                       title: 'Privacy Policy',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const PrivacyPolicyScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const PrivacyPolicyScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.help_outline,
                       title: 'Help Center',
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const HelpCenterScreen(),
-                          ),
-                        );
-                      },
+                      onTap: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const HelpCenterScreen(),
+                        ),
+                      ),
                     ),
                     _buildMenuItem(
                       icon: Icons.people_outline,
@@ -152,7 +164,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       title: 'Logout',
                       isDestructive: true,
                       onTap: () async {
-                        // Show confirmation dialog
                         final shouldLogout = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
@@ -175,11 +186,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         );
-
                         if (shouldLogout == true &&
                             widget.authService != null) {
                           await widget.authService!.signOut();
-                          // Router will handle navigation to welcome screen
                         }
                       },
                     ),
@@ -200,7 +209,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // Logo Badge
           Container(
             width: 36,
             height: 36,
@@ -220,8 +228,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ),
           ),
           const SizedBox(width: 12),
-
-          // Title
           const Expanded(
             child: Text(
               'Profile',
@@ -232,8 +238,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
             ),
           ),
-
-          // Options button
           Container(
             width: 40,
             height: 40,
@@ -248,10 +252,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildProfileSection({
+    required String displayName,
+    required String email,
+    required String photoUrl,
+  }) {
     return Column(
       children: [
-        // Avatar with edit badge
         Stack(
           children: [
             Container(
@@ -260,10 +267,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 4),
-                image: const DecorationImage(
-                  image: NetworkImage('https://i.pravatar.cc/300?img=33'),
-                  fit: BoxFit.cover,
-                ),
+              ),
+              child: ClipOval(
+                child: photoUrl.isNotEmpty
+                    ? CachedNetworkImage(
+                        imageUrl: photoUrl,
+                        width: 120,
+                        height: 120,
+                        fit: BoxFit.cover,
+                        placeholder: (ctx, url) => const Center(
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        ),
+                        errorWidget: (ctx, url, err) => const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Color(0xFF94A3B8),
+                        ),
+                      )
+                    : const Icon(
+                        Icons.person,
+                        size: 60,
+                        color: Color(0xFF94A3B8),
+                      ),
               ),
             ),
             Positioned(
@@ -283,22 +308,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
         const SizedBox(height: 16),
-
-        // User name
-        const Text(
-          'Andrew Ainsley',
-          style: TextStyle(
+        Text(
+          displayName.isNotEmpty ? displayName : 'Sin nombre',
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: Color(0xFF0F172A),
           ),
         ),
         const SizedBox(height: 4),
-
-        // Email
-        const Text(
-          'andrew_ainsley@yourdomain.com',
-          style: TextStyle(
+        Text(
+          email,
+          style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w500,
             color: Color(0xFF64748B),
@@ -336,7 +357,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         padding: const EdgeInsets.symmetric(vertical: 16),
         child: Row(
           children: [
-            // Icon and title
             Icon(icon, size: 24, color: color),
             const SizedBox(width: 16),
             Text(
@@ -347,10 +367,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 color: color,
               ),
             ),
-
             const Spacer(),
-
-            // Right side (value, switch, or chevron)
             if (value != null) ...[
               Text(
                 value,
@@ -362,7 +379,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(width: 8),
             ],
-
             if (hasSwitch)
               Switch(
                 value: switchValue,
