@@ -14,6 +14,9 @@ class WorkerProfile {
   final bool isVerified;
   final SubscriptionStatus subscriptionStatus;
 
+  /// UID of the user who referred this worker.
+  final String? referredBy;
+
   const WorkerProfile({
     required this.uid,
     required this.services,
@@ -21,6 +24,7 @@ class WorkerProfile {
     required this.rating,
     required this.isVerified,
     required this.subscriptionStatus,
+    this.referredBy,
   });
 
   factory WorkerProfile.fromJson(Map<String, dynamic> json) =>
@@ -39,6 +43,7 @@ class WorkerProfile {
     double? rating,
     bool? isVerified,
     SubscriptionStatus? subscriptionStatus,
+    String? referredBy,
   }) {
     return WorkerProfile(
       uid: uid,
@@ -47,6 +52,7 @@ class WorkerProfile {
       rating: rating ?? this.rating,
       isVerified: isVerified ?? this.isVerified,
       subscriptionStatus: subscriptionStatus ?? this.subscriptionStatus,
+      referredBy: referredBy ?? this.referredBy,
     );
   }
 }

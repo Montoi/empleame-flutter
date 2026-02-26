@@ -1,0 +1,88 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Helper functions ──────────────────────────────────────────────────────
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(uid) {
+      return isAuthenticated() && request.auth.uid == uid;
+    }
+
+    function currentRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+
+    // Returns true if the only changed fields are those listed.
+    function onlyChanges(fields) {
+      return request.resource.data.diff(resource.data).affectedKeys().hasOnly(fields);
+    }
+
+    // ── Users collection ──────────────────────────────────────────────────────
+
+    match /users/{uid} {
+      // Any authenticated user can read their own doc.
+      allow read: if isOwner(uid);
+
+      // Allow reads for referralCode lookup (query by referralCode field).
+      // Only authenticated users can query.
+      allow list: if isAuthenticated();
+
+      // Create: only the owner can create their own doc, role must be 'client'.
+      allow create: if isOwner(uid)
+        && request.resource.data.role == 'client';
+
+      // Update — three distinct cases:
+      allow update: if isOwner(uid) && (
+        // 1. Normal profile updates (name, photo, email, etc.) — role must not change.
+        (onlyChanges(['displayName', 'photoUrl', 'email', 'referralCode', 'availableUpdates']))
+
+        ||
+
+        // 2. Worker conversion — role can change to 'worker' ONLY IF:
+        //    a. Previous role was 'client'.
+        //    b. referredBy is being set for the first time (was not present before).
+        //    c. No other fields change beside role and referredBy.
+        (
+          resource.data.role == 'client'
+          && request.resource.data.role == 'worker'
+          && !('referredBy' in resource.data)
+          && ('referredBy' in request.resource.data)
+          && onlyChanges(['role', 'referredBy'])
+        )
+      );
+
+      // Inviter's availableUpdates decrement (comes from the same transaction).
+      // Allow another authenticated user to decrement availableUpdates only.
+      allow update: if isAuthenticated()
+        && onlyChanges(['availableUpdates'])
+        && request.resource.data.availableUpdates == resource.data.availableUpdates - 1
+        && resource.data.availableUpdates > 0;
+    }
+
+    // ── Worker profiles ───────────────────────────────────────────────────────
+
+    match /profiles_worker/{uid} {
+      // Workers can read their own profile; clients/public can also read (for service listings).
+      allow read: if isAuthenticated();
+
+      // Only the owner can create their profile (happens during conversion transaction).
+      allow create: if isOwner(uid);
+
+      // Only the owner can update their own profile.
+      allow update: if isOwner(uid);
+
+      // Deletion not allowed from client.
+      allow delete: if false;
+    }
+
+    // ── Deny everything else ──────────────────────────────────────────────────
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -19,6 +19,7 @@ WorkerProfile _$WorkerProfileFromJson(Map<String, dynamic> json) =>
         _$SubscriptionStatusEnumMap,
         json['subscriptionStatus'],
       ),
+      referredBy: json['referredBy'] as String?,
     );
 
 Map<String, dynamic> _$WorkerProfileToJson(WorkerProfile instance) =>
@@ -30,6 +31,7 @@ Map<String, dynamic> _$WorkerProfileToJson(WorkerProfile instance) =>
       'isVerified': instance.isVerified,
       'subscriptionStatus':
           _$SubscriptionStatusEnumMap[instance.subscriptionStatus]!,
+      'referredBy': instance.referredBy,
     };
 
 const _$SubscriptionStatusEnumMap = {

@@ -13,6 +13,17 @@ class AppUser {
   final String photoUrl;
   final UserRole role;
 
+  /// This user's invitation code. Defaults to their UID.
+  @JsonKey(defaultValue: '')
+  final String referralCode;
+
+  /// How many more workers this user can invite. 0 = cannot invite.
+  @JsonKey(defaultValue: 0)
+  final int availableUpdates;
+
+  /// UID of the user who referred this user (set on worker conversion).
+  final String? referredBy;
+
   @JsonKey(
     fromJson: _timestampFromJson,
     toJson: _timestampToJson,
@@ -26,6 +37,9 @@ class AppUser {
     required this.email,
     required this.photoUrl,
     required this.role,
+    this.referralCode = '',
+    this.availableUpdates = 0,
+    this.referredBy,
     this.createdAt,
   });
 
@@ -44,6 +58,9 @@ class AppUser {
     String? email,
     String? photoUrl,
     UserRole? role,
+    String? referralCode,
+    int? availableUpdates,
+    String? referredBy,
     DateTime? createdAt,
   }) {
     return AppUser(
@@ -52,6 +69,9 @@ class AppUser {
       email: email ?? this.email,
       photoUrl: photoUrl ?? this.photoUrl,
       role: role ?? this.role,
+      referralCode: referralCode ?? this.referralCode,
+      availableUpdates: availableUpdates ?? this.availableUpdates,
+      referredBy: referredBy ?? this.referredBy,
       createdAt: createdAt ?? this.createdAt,
     );
   }

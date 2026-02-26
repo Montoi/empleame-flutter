@@ -9,6 +9,7 @@ import 'package:empleame/screens/profile/language_screen.dart';
 import 'package:empleame/screens/profile/payment_methods_screen.dart';
 import 'package:empleame/screens/profile/privacy_policy_screen.dart';
 import 'package:empleame/screens/profile/help_center_screen.dart';
+import 'package:empleame/screens/profile/become_worker_screen.dart';
 import 'package:empleame/services/auth_service.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
@@ -85,6 +86,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                     ),
+
+                    // ── Become Worker — only visible for clients ──────────
+                    if (userAsync.valueOrNull?.role.name == 'client')
+                      _buildMenuItem(
+                        icon: Icons.rocket_launch_outlined,
+                        title: 'Conviértete en Trabajador 🚀',
+                        titleColor: const Color(0xFF7210FF),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const BecomeWorkerScreen(),
+                          ),
+                        ),
+                      ),
                     _buildMenuItem(
                       icon: Icons.notifications_outlined,
                       title: 'Notification',
@@ -346,10 +361,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     bool hasSwitch = false,
     bool switchValue = false,
     ValueChanged<bool>? onSwitchChanged,
+    Color? titleColor,
   }) {
-    final color = isDestructive
-        ? const Color(0xFFEF4444)
-        : const Color(0xFF0F172A);
+    final color =
+        titleColor ??
+        (isDestructive ? const Color(0xFFEF4444) : const Color(0xFF0F172A));
 
     return InkWell(
       onTap: hasSwitch ? null : onTap,
