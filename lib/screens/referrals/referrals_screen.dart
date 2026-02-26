@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:empleame/providers/providers.dart';
 import 'dart:math' as math;
 
-class ReferralsScreen extends StatelessWidget {
+class ReferralsScreen extends ConsumerWidget {
   const ReferralsScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final userAsync = ref.watch(currentUserStreamProvider);
+    final referralCode = userAsync.valueOrNull?.referralCode ?? '';
+    final availableUpdates = userAsync.valueOrNull?.availableUpdates ?? 0;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       body: SafeArea(
@@ -18,11 +25,11 @@ class ReferralsScreen extends StatelessWidget {
               const SizedBox(height: 8),
 
               // Circular Gauge Card
-              _buildGaugeCard(context),
+              _buildGaugeCard(context, referralCode),
               const SizedBox(height: 24),
 
               // Invites Tracker Card
-              _buildInvitesCard(),
+              _buildInvitesCard(availableUpdates),
             ],
           ),
         ),
@@ -63,7 +70,7 @@ class ReferralsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildGaugeCard(BuildContext context) {
+  Widget _buildGaugeCard(BuildContext context, String referralCode) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -113,59 +120,10 @@ class ReferralsScreen extends StatelessWidget {
               _buildRoundButton(Icons.share),
             ],
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
-          // Footer Stats
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Text(
-                          'Today, 06:00',
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Icon(Icons.edit, size: 14, color: Colors.grey[400]),
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'Start Invite',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
-              Container(width: 1, height: 40, color: const Color(0xFFF1F5F9)),
-              Expanded(
-                child: Column(
-                  children: [
-                    const Text(
-                      'Today, 22:00',
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      'End Invite',
-                      style: TextStyle(fontSize: 11, color: Colors.grey[500]),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          // Referral code copy widget
+          _ReferralCodeWidget(referralCode: referralCode),
         ],
       ),
     );
@@ -316,7 +274,7 @@ class ReferralsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInvitesCard() {
+  Widget _buildInvitesCard(int availableUpdates) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -361,9 +319,9 @@ class ReferralsScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.baseline,
                     textBaseline: TextBaseline.alphabetic,
                     children: [
-                      const Text(
-                        '5',
-                        style: TextStyle(
+                      Text(
+                        '$availableUpdates',
+                        style: const TextStyle(
                           fontSize: 30,
                           fontWeight: FontWeight.w700,
                           color: Color(0xFF0F172A),
@@ -413,6 +371,99 @@ class ReferralsScreen extends StatelessWidget {
                 ],
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── Referral code copy widget ─────────────────────────────────────────────────
+
+class _ReferralCodeWidget extends StatefulWidget {
+  final String referralCode;
+  const _ReferralCodeWidget({required this.referralCode});
+
+  @override
+  State<_ReferralCodeWidget> createState() => _ReferralCodeWidgetState();
+}
+
+class _ReferralCodeWidgetState extends State<_ReferralCodeWidget> {
+  bool _copied = false;
+
+  Future<void> _copyToClipboard() async {
+    final code = widget.referralCode.isEmpty ? '—' : widget.referralCode;
+    await Clipboard.setData(ClipboardData(text: code));
+    setState(() => _copied = true);
+    await Future<void>.delayed(const Duration(seconds: 2));
+    if (mounted) setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final code = widget.referralCode.isEmpty ? '...' : widget.referralCode;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF3ECFF),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: const Color(0xFF7210FF).withValues(alpha: 0.2),
+        ),
+      ),
+      child: Row(
+        children: [
+          const Icon(
+            Icons.confirmation_number_outlined,
+            size: 20,
+            color: Color(0xFF7210FF),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Tu código de invitación',
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF64748B),
+                    letterSpacing: 0.5,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  code,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w900,
+                    color: Color(0xFF7210FF),
+                    letterSpacing: 2,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          GestureDetector(
+            onTap: _copyToClipboard,
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 250),
+              child: _copied
+                  ? const Icon(
+                      Icons.check_circle_rounded,
+                      key: ValueKey('check'),
+                      color: Color(0xFF10B981),
+                      size: 26,
+                    )
+                  : const Icon(
+                      Icons.copy_rounded,
+                      key: ValueKey('copy'),
+                      color: Color(0xFF7210FF),
+                      size: 22,
+                    ),
+            ),
           ),
         ],
       ),
