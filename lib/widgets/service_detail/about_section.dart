@@ -19,7 +19,7 @@ class _AboutSectionState extends State<AboutSection> {
         : widget.text;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 20),
+      padding: const EdgeInsets.symmetric(vertical: 23),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

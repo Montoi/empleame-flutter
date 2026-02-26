@@ -71,25 +71,33 @@ class _BottomNavScaffoldState extends State<BottomNavScaffold> {
       bottomNavigationBar: NavigationBar(
         selectedIndex: _currentIndex,
         onDestinationSelected: _onNavigationTapped,
+        height: 64,
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return TextStyle(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+          );
+        }),
         destinations: const [
           NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined, size: 22),
+            selectedIcon: Icon(Icons.home, size: 22),
             label: 'Inicio',
           ),
           NavigationDestination(
-            icon: Icon(Icons.calendar_today_outlined),
-            selectedIcon: Icon(Icons.calendar_today),
+            icon: Icon(Icons.calendar_today_outlined, size: 22),
+            selectedIcon: Icon(Icons.calendar_today, size: 22),
             label: 'Reservas',
           ),
           NavigationDestination(
-            icon: Icon(Icons.people_outline),
-            selectedIcon: Icon(Icons.people),
+            icon: Icon(Icons.people_outline, size: 22),
+            selectedIcon: Icon(Icons.people, size: 22),
             label: 'Referidos',
           ),
           NavigationDestination(
-            icon: Icon(Icons.person_outline),
-            selectedIcon: Icon(Icons.person),
+            icon: Icon(Icons.person_outline, size: 22),
+            selectedIcon: Icon(Icons.person, size: 22),
             label: 'Perfil',
           ),
         ],

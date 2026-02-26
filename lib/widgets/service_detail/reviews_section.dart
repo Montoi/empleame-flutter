@@ -57,7 +57,7 @@ class _ReviewsSectionState extends State<ReviewsSection> {
     final reviews = _filtered;
 
     return Padding(
-      padding: const EdgeInsets.only(top: 20),
+      padding: const EdgeInsets.only(top: 23),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
