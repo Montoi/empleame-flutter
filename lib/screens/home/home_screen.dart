@@ -146,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: PopularServicesSection(
                 categories: categories,
-                services: _convertPopularServices(context).take(5).toList(),
+                services: _convertPopularServices(context),
               ),
             ),
 

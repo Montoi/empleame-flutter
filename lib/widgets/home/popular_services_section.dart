@@ -20,6 +20,16 @@ class _PopularServicesSectionState extends State<PopularServicesSection> {
 
   @override
   Widget build(BuildContext context) {
+    final selectedCategory = widget.categories[_selectedIndex];
+    final filtered =
+        (selectedCategory == 'All'
+                ? widget.services
+                : widget.services
+                      .where((s) => s.category == selectedCategory)
+                      .toList())
+            .take(5)
+            .toList();
+
     return Column(
       children: [
         // Filter Chips
@@ -63,26 +73,39 @@ class _PopularServicesSectionState extends State<PopularServicesSection> {
           ),
         ),
         const SizedBox(height: 16),
-        // Service Cards
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Column(
-            children: widget.services.map((service) {
-              return ServiceCard(
-                title: service.title,
-                category: service.category,
-                provider: service.provider,
-                price: service.price,
-                rating: service.rating,
-                reviews: service.reviews,
-                imageUrl: service.imageUrl,
-                isBookmarked: service.isBookmarked,
-                onTap: service.onTap,
-                onBookmark: service.onBookmark,
-              );
-            }).toList(),
+        // Filtered service cards (max 5)
+        if (filtered.isEmpty)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Text(
+              'No hay servicios en esta categoría',
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[500],
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          )
+        else
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              children: filtered.map((service) {
+                return ServiceCard(
+                  title: service.title,
+                  category: service.category,
+                  provider: service.provider,
+                  price: service.price,
+                  rating: service.rating,
+                  reviews: service.reviews,
+                  imageUrl: service.imageUrl,
+                  isBookmarked: service.isBookmarked,
+                  onTap: service.onTap,
+                  onBookmark: service.onBookmark,
+                );
+              }).toList(),
+            ),
           ),
-        ),
       ],
     );
   }
