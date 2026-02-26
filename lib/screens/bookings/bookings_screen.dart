@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:empleame/screens/chat/chat_screen.dart';
 
 enum BookingStatus { upcoming, completed, cancelled }
 
@@ -376,12 +377,12 @@ class _BookingsScreenState extends State<BookingsScreen>
                     size: 20,
                   ),
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Opening chat with ${booking.providerName}...',
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => ChatScreen(
+                          providerName: booking.providerName,
+                          providerImage: booking.providerImage,
                         ),
-                        behavior: SnackBarBehavior.floating,
                       ),
                     );
                   },
