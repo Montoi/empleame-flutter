@@ -146,7 +146,7 @@ class HomeScreen extends ConsumerWidget {
             SliverToBoxAdapter(
               child: PopularServicesSection(
                 categories: categories,
-                services: _convertPopularServices().take(5).toList(),
+                services: _convertPopularServices(context).take(5).toList(),
               ),
             ),
 
@@ -167,7 +167,7 @@ class HomeScreen extends ConsumerWidget {
     }).toList();
   }
 
-  List<ServiceCardData> _convertPopularServices() {
+  List<ServiceCardData> _convertPopularServices(BuildContext context) {
     return popularServices.map((service) {
       return ServiceCardData(
         title: service.title,
@@ -179,11 +179,21 @@ class HomeScreen extends ConsumerWidget {
         imageUrl: service.image,
         isBookmarked: service.isBookmarked,
         onTap: () {
-          // Handle service tap
+          final uri = Uri(
+            path: '/service-detail',
+            queryParameters: {
+              'title': service.title,
+              'provider': service.provider,
+              'category': service.category,
+              'image': service.image,
+              'price': service.price.toString(),
+              'rating': service.rating.toString(),
+              'reviewCount': service.reviewCount.toString(),
+            },
+          );
+          context.push(uri.toString());
         },
-        onBookmark: () {
-          // Handle bookmark
-        },
+        onBookmark: () {},
       );
     }).toList();
   }

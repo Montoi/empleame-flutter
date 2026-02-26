@@ -4,6 +4,7 @@ import 'package:empleame/widgets/navigation/bottom_nav_scaffold.dart';
 import 'package:empleame/screens/services/all_services_screen.dart';
 import 'package:empleame/screens/services/popular_services_screen.dart';
 import 'package:empleame/screens/services/special_offers_screen.dart';
+import 'package:empleame/screens/services/service_detail_screen.dart';
 import 'package:empleame/screens/auth/welcome_screen.dart';
 import 'package:empleame/screens/auth/login_screen.dart';
 import 'package:empleame/screens/auth/sign_up_screen.dart';
@@ -68,6 +69,21 @@ GoRouter createRouter(AuthService authService) {
       GoRoute(
         path: '/special-offers',
         builder: (context, state) => const SpecialOffersScreen(),
+      ),
+      GoRoute(
+        path: '/service-detail',
+        builder: (context, state) {
+          final p = state.uri.queryParameters;
+          return ServiceDetailScreen(
+            title: p['title'] ?? 'Servicio',
+            provider: p['provider'] ?? '',
+            category: p['category'] ?? '',
+            image: p['image'] ?? '',
+            price: double.tryParse(p['price'] ?? '0') ?? 0,
+            rating: double.tryParse(p['rating'] ?? '4.8') ?? 4.8,
+            reviewCount: int.tryParse(p['reviewCount'] ?? '0') ?? 0,
+          );
+        },
       ),
     ],
   );

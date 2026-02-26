@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:empleame/data/mock_data.dart';
 import 'package:empleame/widgets/home/service_card.dart';
 
@@ -108,14 +109,19 @@ class _PopularServicesScreenState extends State<PopularServicesScreen> {
                           imageUrl: service.image,
                           isBookmarked: service.isBookmarked,
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'Opening ${service.title} details...',
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                              ),
+                            final uri = Uri(
+                              path: '/service-detail',
+                              queryParameters: {
+                                'title': service.title,
+                                'provider': service.provider,
+                                'category': service.category,
+                                'image': service.image,
+                                'price': service.price.toString(),
+                                'rating': service.rating.toString(),
+                                'reviewCount': service.reviewCount.toString(),
+                              },
                             );
+                            context.push(uri.toString());
                           },
                           onBookmark: () {
                             ScaffoldMessenger.of(context).showSnackBar(

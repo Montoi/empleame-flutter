@@ -250,3 +250,63 @@ const categories = [
   'Plumbing',
   'Shifting',
 ];
+
+const mockPhotos = [
+  'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=400&q=80',
+  'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400&q=80',
+  'https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400&q=80',
+  'https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80',
+];
+
+const mockReviews = [
+  Review(
+    id: '1',
+    user: 'Jenny Wilson',
+    avatar: 'https://i.pravatar.cc/150?img=5',
+    rating: 5.0,
+    time: '2 days ago',
+    content:
+        'Excellent service! The team was professional, punctual, and left my home spotless. Highly recommend!',
+    likes: 128,
+  ),
+  Review(
+    id: '2',
+    user: 'Robert Fox',
+    avatar: 'https://i.pravatar.cc/150?img=8',
+    rating: 4.0,
+    time: '1 week ago',
+    content:
+        'Great job overall. A few minor spots were missed but they came back and fixed everything without any extra charge.',
+    likes: 74,
+  ),
+  Review(
+    id: '3',
+    user: 'Savannah Nguyen',
+    avatar: 'https://i.pravatar.cc/150?img=9',
+    rating: 5.0,
+    time: '2 weeks ago',
+    content:
+        'Amazing experience from booking to completion. Will definitely book again for next month.',
+    likes: 92,
+  ),
+  Review(
+    id: '4',
+    user: 'Cameron Williamson',
+    avatar: 'https://i.pravatar.cc/150?img=11',
+    rating: 3.0,
+    time: '3 weeks ago',
+    content:
+        'Decent service for the price. The workers were polite but took longer than expected.',
+    likes: 33,
+  ),
+  Review(
+    id: '5',
+    user: 'Brooklyn Simmons',
+    avatar: 'https://i.pravatar.cc/150?img=15',
+    rating: 5.0,
+    time: '1 month ago',
+    content:
+        'Best cleaning service I\'ve used in years. The attention to detail was incredible.',
+    likes: 210,
+  ),
+];

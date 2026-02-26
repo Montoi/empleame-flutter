@@ -69,3 +69,23 @@ class PopularService {
     this.isBookmarked = false,
   });
 }
+
+class Review {
+  final String id;
+  final String user;
+  final String avatar;
+  final double rating;
+  final String time;
+  final String content;
+  final int likes;
+
+  const Review({
+    required this.id,
+    required this.user,
+    required this.avatar,
+    required this.rating,
+    required this.time,
+    required this.content,
+    required this.likes,
+  });
+}
