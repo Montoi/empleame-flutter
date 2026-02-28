@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:empleame/models/user_model.dart';
 import 'package:empleame/providers/providers.dart';
 import 'package:empleame/screens/profile/edit_profile_screen.dart';
 import 'package:empleame/screens/profile/notification_settings_screen.dart';
@@ -11,6 +12,7 @@ import 'package:empleame/screens/profile/privacy_policy_screen.dart';
 import 'package:empleame/screens/profile/help_center_screen.dart';
 import 'package:empleame/screens/profile/become_worker_screen.dart';
 import 'package:empleame/services/auth_service.dart';
+import 'package:empleame/widgets/common/user_role_tag.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   final AuthService? authService;
@@ -47,6 +49,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         displayName: user?.displayName ?? '',
                         email: user?.email ?? '',
                         photoUrl: user?.photoUrl ?? '',
+                        role: user?.role,
                       ),
                       loading: () => const Padding(
                         padding: EdgeInsets.symmetric(vertical: 40),
@@ -271,6 +274,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     required String displayName,
     required String email,
     required String photoUrl,
+    UserRole? role,
   }) {
     return Column(
       children: [
@@ -322,7 +326,11 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 12),
+        if (role != null) ...[
+          UserRoleTag(role: role),
+          const SizedBox(height: 8),
+        ],
         Text(
           displayName.isNotEmpty ? displayName : 'Sin nombre',
           style: const TextStyle(

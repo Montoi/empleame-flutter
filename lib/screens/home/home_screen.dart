@@ -43,6 +43,7 @@ class HomeScreen extends ConsumerWidget {
                 profileImageUrl: user?.photoUrl.isNotEmpty == true
                     ? user!.photoUrl
                     : null,
+                role: user?.role,
                 onNotificationTap: () {
                   Navigator.push(
                     context,

@@ -1,10 +1,13 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:empleame/models/user_model.dart';
+import 'package:empleame/widgets/common/user_role_tag.dart';
 
 class AppHeader extends StatelessWidget {
   final String userName;
   final String greeting;
   final String? profileImageUrl;
+  final UserRole? role;
   final VoidCallback? onNotificationTap;
   final VoidCallback? onBookmarkTap;
 
@@ -13,6 +16,7 @@ class AppHeader extends StatelessWidget {
     required this.userName,
     this.greeting = 'Buenos días',
     this.profileImageUrl,
+    this.role,
     this.onNotificationTap,
     this.onBookmarkTap,
   });
@@ -69,11 +73,19 @@ class AppHeader extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 2),
-                Text(
-                  userName,
-                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.bold,
-                  ),
+                Wrap(
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  spacing: 8,
+                  runSpacing: 2,
+                  children: [
+                    Text(
+                      userName,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (role != null) UserRoleTag(role: role!),
+                  ],
                 ),
               ],
             ),
