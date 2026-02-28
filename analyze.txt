@@ -1,0 +1,17 @@
+﻿Analyzing empleame...                                           
+
+   info - Unnecessary use of multiple underscores - lib\screens\profile\become_worker_screen.dart:409:40 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\screens\profile\become_worker_screen.dart:414:40 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\screens\profile\become_worker_screen.dart:414:44 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\profile\notifications_screen.dart:163:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\profile\notifications_screen.dart:197:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\profile\notifications_screen.dart:209:42 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\screens\profile\notifications_screen.dart:221:42 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\screens\services\service_detail_screen.dart:211:37 - unnecessary_underscores
+warning - Unused import: 'package:cached_network_image/cached_network_image.dart' - lib\screens\worker\my_services_screen.dart:3:8 - unused_import
+   info - 'value' is deprecated and shouldn't be used. Use initialValue instead. This will set the initial value for the form field. This feature was deprecated after v3.33.0-1.0.pre - lib\screens\worker\service_form_screen.dart:364:5 - deprecated_member_use
+   info - Don't invoke 'print' in production code - lib\services\auth_service.dart:54:20 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\google_sign_in_service.dart:68:13 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\google_sign_in_service.dart:73:7 - avoid_print
+   info - Don't invoke 'print' in production code - lib\services\google_sign_in_service.dart:84:7 - avoid_print
+

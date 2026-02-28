@@ -11,6 +11,7 @@ import 'package:empleame/screens/profile/payment_methods_screen.dart';
 import 'package:empleame/screens/profile/privacy_policy_screen.dart';
 import 'package:empleame/screens/profile/help_center_screen.dart';
 import 'package:empleame/screens/profile/become_worker_screen.dart';
+import 'package:empleame/screens/worker/my_services_screen.dart';
 import 'package:empleame/services/auth_service.dart';
 import 'package:empleame/widgets/common/user_role_tag.dart';
 
@@ -89,6 +90,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         ),
                       ),
                     ),
+
+                    // ── My Services — only visible for workers ────────────
+                    if (userAsync.valueOrNull?.role.name == 'worker')
+                      _buildMenuItem(
+                        icon: Icons.work_outline,
+                        title: 'Mis Servicios',
+                        titleColor: const Color(0xFF7210FF),
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MyServicesScreen(),
+                          ),
+                        ),
+                      ),
 
                     // ── Become Worker — only visible for clients ──────────
                     if (userAsync.valueOrNull?.role.name == 'client')

@@ -406,12 +406,12 @@ class _InviterCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       fit: BoxFit.cover,
-                      placeholder: (_, __) => Container(
+                      placeholder: (_, _) => Container(
                         width: 48,
                         height: 48,
                         color: Colors.grey[200],
                       ),
-                      errorWidget: (_, __, ___) =>
+                      errorWidget: (_, _, _) =>
                           _AvatarFallback(name: inviter.displayName),
                     )
                   : _AvatarFallback(name: inviter.displayName),

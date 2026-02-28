@@ -79,6 +79,21 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Services ──────────────────────────────────────────────────────────────
+
+    match /services/{serviceId} {
+      // Anyone can read a service.
+      allow read: if isAuthenticated();
+
+      // Only the worker associated with the service can create it.
+      allow create: if isAuthenticated()
+                 && request.resource.data.workerId == request.auth.uid;
+
+      // Only the owning worker can update or delete their service.
+      allow update, delete: if isAuthenticated()
+                 && resource.data.workerId == request.auth.uid;
+    }
+
     // ── Deny everything else ──────────────────────────────────────────────────
 
     match /{document=**} {

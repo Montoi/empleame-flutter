@@ -1,21 +1,27 @@
+import 'dart:io';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class DetailHeader extends StatelessWidget {
-  final String imageUrl;
+  /// Provide [imageUrl] for remote images or [imageFile] for local File images.
+  final String? imageUrl;
+  final File? imageFile;
   final VoidCallback onBack;
   final VoidCallback onShare;
 
   const DetailHeader({
     super.key,
-    required this.imageUrl,
+    this.imageUrl,
+    this.imageFile,
     required this.onBack,
     required this.onShare,
-  });
+  }) : assert(
+         imageUrl != null || imageFile != null,
+         'Provide either imageUrl or imageFile',
+       );
 
   @override
   Widget build(BuildContext context) {
-    // Match the React impl: top: topInset + 12
     final topInset = MediaQuery.of(context).padding.top;
 
     return SizedBox(
@@ -23,21 +29,24 @@ class DetailHeader extends StatelessWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          // Hero image
-          CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: BoxFit.cover,
-            placeholder: (ctx, url) => Container(
-              color: Colors.grey[200],
-              child: const Center(child: CircularProgressIndicator()),
+          // Hero image — local File or remote URL
+          if (imageFile != null)
+            Image.file(imageFile!, fit: BoxFit.cover)
+          else
+            CachedNetworkImage(
+              imageUrl: imageUrl!,
+              fit: BoxFit.cover,
+              placeholder: (ctx, url) => Container(
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+              errorWidget: (ctx, url, err) => Container(
+                color: Colors.grey[200],
+                child: const Icon(Icons.image_not_supported, size: 48),
+              ),
             ),
-            errorWidget: (ctx, url, err) => Container(
-              color: Colors.grey[200],
-              child: const Icon(Icons.image_not_supported, size: 48),
-            ),
-          ),
 
-          // Gradient overlay for button readability
+          // Gradient overlay
           Positioned.fill(
             child: DecoratedBox(
               decoration: BoxDecoration(
@@ -54,7 +63,7 @@ class DetailHeader extends StatelessWidget {
             ),
           ),
 
-          // Back & Share buttons — anchored to top inset (same as React topInset + 12)
+          // Back & Share buttons
           Positioned(
             top: topInset + 12,
             left: 24,
