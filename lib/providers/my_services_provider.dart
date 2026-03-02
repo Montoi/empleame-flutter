@@ -12,11 +12,16 @@ final serviceRepositoryProvider = Provider<ServiceRepository>((ref) {
 
 // ── Worker's services stream ─────────────────────────────────────────────────
 
-/// Emits the real-time list of services for the current worker.
-final myServicesProvider = StreamProvider<List<ServiceModel>>((ref) {
+/// Emits the list of services for the current worker.
+final myServicesProvider = FutureProvider<List<ServiceModel>>((ref) async {
   final uid = ref.watch(currentUserStreamProvider).valueOrNull?.uid ?? '';
-  if (uid.isEmpty) return const Stream.empty();
-  return ref.watch(serviceRepositoryProvider).watchWorkerServices(uid);
+  if (uid.isEmpty) return [];
+  return ref.watch(serviceRepositoryProvider).getWorkerServices(uid);
+});
+
+/// Emits the list of pending services for the Admin Moderation panel.
+final pendingServicesProvider = FutureProvider<List<ServiceModel>>((ref) async {
+  return ref.watch(serviceRepositoryProvider).getPendingServices();
 });
 
 // ── Form state ───────────────────────────────────────────────────────────────

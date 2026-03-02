@@ -55,7 +55,7 @@ class AllServicesScreen extends StatelessWidget {
           crossAxisCount: 4,
           crossAxisSpacing: 16,
           mainAxisSpacing: 32,
-          childAspectRatio: 0.85,
+          childAspectRatio: 0.75,
         ),
         itemCount: services.where((s) => s.name != 'More').length,
         itemBuilder: (context, index) {

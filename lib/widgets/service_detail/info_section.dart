@@ -52,12 +52,16 @@ class InfoSection extends StatelessWidget {
                     const SizedBox(height: 6),
                     Row(
                       children: [
-                        Text(
-                          provider,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w800,
-                            color: _primary,
+                        Flexible(
+                          child: Text(
+                            provider,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: _primary,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),

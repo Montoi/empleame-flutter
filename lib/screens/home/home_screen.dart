@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:empleame/providers/providers.dart';
+import 'package:empleame/providers/services_provider.dart';
+import 'package:empleame/models/service_model.dart';
 import 'package:empleame/widgets/common/section_header.dart';
 import 'package:empleame/widgets/home/app_header.dart';
 import 'package:empleame/widgets/home/search_bar_widget.dart';
 import 'package:empleame/widgets/home/offer_carousel.dart';
 import 'package:empleame/widgets/home/services_grid.dart';
 import 'package:empleame/widgets/home/popular_services_section.dart';
-import 'package:empleame/data/mock_data.dart';
+import 'package:empleame/data/mock_data.dart'
+    show categories, specialOffers, services;
 import 'package:empleame/utils/icon_mapper.dart';
 import 'package:empleame/screens/profile/notifications_screen.dart';
 import 'package:empleame/screens/home/bookmarks_screen.dart';
@@ -145,10 +148,54 @@ class HomeScreen extends ConsumerWidget {
             const SliverToBoxAdapter(child: SizedBox(height: 4)),
 
             SliverToBoxAdapter(
-              child: PopularServicesSection(
-                categories: categories,
-                services: _convertPopularServices(context),
-              ),
+              child: ref
+                  .watch(popularServicesProvider)
+                  .when(
+                    data: (services) {
+                      if (services.isEmpty) {
+                        return const Padding(
+                          padding: EdgeInsets.all(24),
+                          child: Center(
+                            child: Text(
+                              'No hay servicios populares disponibles aún.',
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                        );
+                      }
+                      return PopularServicesSection(
+                        categories: categories,
+                        services: _convertLivePopularServices(
+                          context,
+                          services,
+                        ),
+                      );
+                    },
+                    loading: () => const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 20,
+                      ),
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
+                    error: (err, stack) => Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Center(
+                        child: Column(
+                          children: [
+                            const Icon(Icons.error_outline, color: Colors.red),
+                            const SizedBox(height: 8),
+                            const Text('Error al cargar servicios'),
+                            TextButton(
+                              onPressed: () =>
+                                  ref.invalidate(popularServicesProvider),
+                              child: const Text('Reintentar'),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
             ),
 
             const SliverToBoxAdapter(child: SizedBox(height: 80)),
@@ -168,31 +215,25 @@ class HomeScreen extends ConsumerWidget {
     }).toList();
   }
 
-  List<ServiceCardData> _convertPopularServices(BuildContext context) {
-    return popularServices.map((service) {
+  List<ServiceCardData> _convertLivePopularServices(
+    BuildContext context,
+    List<ServiceModel> activeServices,
+  ) {
+    return activeServices.map((service) {
       return ServiceCardData(
         title: service.title,
         category: service.category,
-        provider: service.provider,
-        price: service.price,
-        rating: service.rating,
-        reviews: service.reviewCount,
-        imageUrl: service.image,
-        isBookmarked: service.isBookmarked,
+        provider:
+            'Worker Name', // TODO: join with user table or store denormalized names
+        price: service.rate,
+        rating: 5.0, // TODO: store real rating in ServiceModel
+        reviews: 0,
+        imageUrl: service.imageUrls.isNotEmpty ? service.imageUrls.first : '',
+        isBookmarked: false,
         onTap: () {
-          final uri = Uri(
-            path: '/service-detail',
-            queryParameters: {
-              'title': service.title,
-              'provider': service.provider,
-              'category': service.category,
-              'image': service.image,
-              'price': service.price.toString(),
-              'rating': service.rating.toString(),
-              'reviewCount': service.reviewCount.toString(),
-            },
-          );
-          context.push(uri.toString());
+          // Navigation logic strictly relies on ID to support deep linking and
+          // provider family caching in ServiceDetailScreen
+          context.push('/service-detail/${service.id}');
         },
         onBookmark: () {},
       );

@@ -71,18 +71,10 @@ GoRouter createRouter(AuthService authService) {
         builder: (context, state) => const SpecialOffersScreen(),
       ),
       GoRoute(
-        path: '/service-detail',
+        path: '/service-detail/:id',
         builder: (context, state) {
-          final p = state.uri.queryParameters;
-          return ServiceDetailScreen(
-            title: p['title'] ?? 'Servicio',
-            provider: p['provider'] ?? '',
-            category: p['category'] ?? '',
-            image: p['image'] ?? '',
-            price: double.tryParse(p['price'] ?? '0') ?? 0,
-            rating: double.tryParse(p['rating'] ?? '4.8') ?? 4.8,
-            reviewCount: int.tryParse(p['reviewCount'] ?? '0') ?? 0,
-          );
+          final id = state.pathParameters['id'] ?? '';
+          return ServiceDetailScreen(serviceId: id);
         },
       ),
     ],

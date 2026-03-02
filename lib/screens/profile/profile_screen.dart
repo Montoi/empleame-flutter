@@ -91,8 +91,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     ),
 
-                    // ── My Services — only visible for workers ────────────
-                    if (userAsync.valueOrNull?.role.name == 'worker')
+                    // ── My Services — visible for workers and admins ────────────
+                    if (userAsync.valueOrNull?.role.name == 'worker' ||
+                        userAsync.valueOrNull?.role.name == 'admin')
                       _buildMenuItem(
                         icon: Icons.work_outline,
                         title: 'Mis Servicios',

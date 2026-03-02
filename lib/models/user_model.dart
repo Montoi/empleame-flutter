@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'user_model.g.dart';
 
-enum UserRole { client, worker }
+enum UserRole { client, worker, admin }
 
 @JsonSerializable(explicitToJson: true)
 class AppUser {
@@ -24,6 +24,19 @@ class AppUser {
   /// UID of the user who referred this user (set on worker conversion).
   final String? referredBy;
 
+  final String? nickname;
+  final String? country;
+  final String? phone;
+  final String? gender;
+  final String? address;
+
+  @JsonKey(
+    fromJson: _timestampFromJson,
+    toJson: _timestampToJson,
+    includeIfNull: false,
+  )
+  final DateTime? dateOfBirth;
+
   @JsonKey(
     fromJson: _timestampFromJson,
     toJson: _timestampToJson,
@@ -40,6 +53,12 @@ class AppUser {
     this.referralCode = '',
     this.availableUpdates = 0,
     this.referredBy,
+    this.nickname,
+    this.country,
+    this.phone,
+    this.gender,
+    this.address,
+    this.dateOfBirth,
     this.createdAt,
   });
 
@@ -50,6 +69,15 @@ class AppUser {
 
   factory AppUser.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    if (data['role'] is String) {
+      final String safeRole = (data['role'] as String).toLowerCase();
+      // If it's not a valid role like 'admin' or 'worker', default to 'client' rather than crashing the stream
+      if (safeRole != 'client' && safeRole != 'worker' && safeRole != 'admin') {
+        data['role'] = 'client';
+      } else {
+        data['role'] = safeRole;
+      }
+    }
     return AppUser.fromJson(data);
   }
 
@@ -61,6 +89,12 @@ class AppUser {
     String? referralCode,
     int? availableUpdates,
     String? referredBy,
+    String? nickname,
+    String? country,
+    String? phone,
+    String? gender,
+    String? address,
+    DateTime? dateOfBirth,
     DateTime? createdAt,
   }) {
     return AppUser(
@@ -72,6 +106,12 @@ class AppUser {
       referralCode: referralCode ?? this.referralCode,
       availableUpdates: availableUpdates ?? this.availableUpdates,
       referredBy: referredBy ?? this.referredBy,
+      nickname: nickname ?? this.nickname,
+      country: country ?? this.country,
+      phone: phone ?? this.phone,
+      gender: gender ?? this.gender,
+      address: address ?? this.address,
+      dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       createdAt: createdAt ?? this.createdAt,
     );
   }

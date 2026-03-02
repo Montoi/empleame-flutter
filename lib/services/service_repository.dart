@@ -10,16 +10,54 @@ class ServiceRepository {
   CollectionReference<Map<String, dynamic>> get _services =>
       _db.collection('services');
 
-  // ── Streams ───────────────────────────────────────────────────────────────
+  // ── Queries (Futures for Pull-To-Refresh) ──────────────────────────────────
 
-  Stream<List<ServiceModel>> watchWorkerServices(String workerId) {
-    return _services
+  Future<List<ServiceModel>> getWorkerServices(String workerId) async {
+    final query = await _services
         .where('workerId', isEqualTo: workerId)
         .where('status', isNotEqualTo: 'deleted')
         .orderBy('status')
         .orderBy('createdAt', descending: true)
+        .get();
+    return query.docs.map(ServiceModel.fromFirestore).toList();
+  }
+
+  // ── Streams (Live UI Feeds) ───────────────────────────────────────────────
+
+  /// Streams the newest active services, limited to [limit] for efficiency.
+  Stream<List<ServiceModel>> watchRecentServices({int limit = 20}) {
+    return _services
+        .where('status', isEqualTo: 'active')
+        .orderBy('createdAt', descending: true)
+        .limit(limit)
         .snapshots()
         .map((snap) => snap.docs.map(ServiceModel.fromFirestore).toList());
+  }
+
+  /// Streams active services ordered by their rate (as popularity metric), limited.
+  Stream<List<ServiceModel>> watchPopularServices({int limit = 10}) {
+    return _services
+        .where('status', isEqualTo: 'active')
+        .orderBy('rate', descending: false)
+        .limit(limit)
+        .snapshots()
+        .map((snap) => snap.docs.map(ServiceModel.fromFirestore).toList());
+  }
+
+  /// Streams a single service by ID for robust deep linking and caching.
+  Stream<ServiceModel?> watchServiceById(String id) {
+    return _services.doc(id).snapshots().map((snap) {
+      if (!snap.exists) return null;
+      return ServiceModel.fromFirestore(snap);
+    });
+  }
+
+  Future<List<ServiceModel>> getPendingServices() async {
+    final query = await _services
+        .where('status', isEqualTo: 'pending_review')
+        .orderBy('createdAt', descending: false)
+        .get();
+    return query.docs.map(ServiceModel.fromFirestore).toList();
   }
 
   // ── Writes ────────────────────────────────────────────────────────────────
@@ -44,6 +82,19 @@ class ServiceRepository {
       'imageUrls': service.imageUrls,
       'status': service.status,
     });
+  }
+
+  /// Changes the status of a service (used by Admin)
+  Future<void> updateServiceStatus(
+    String id,
+    String status, {
+    String? adminNotes,
+  }) async {
+    final Map<String, dynamic> data = {'status': status};
+    if (adminNotes != null) {
+      data['adminNotes'] = adminNotes;
+    }
+    await _services.doc(id).update(data);
   }
 
   Future<void> deleteService(String id) async {

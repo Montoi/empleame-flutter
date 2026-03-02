@@ -15,6 +15,12 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
   referralCode: json['referralCode'] as String? ?? '',
   availableUpdates: (json['availableUpdates'] as num?)?.toInt() ?? 0,
   referredBy: json['referredBy'] as String?,
+  nickname: json['nickname'] as String?,
+  country: json['country'] as String?,
+  phone: json['phone'] as String?,
+  gender: json['gender'] as String?,
+  address: json['address'] as String?,
+  dateOfBirth: _timestampFromJson(json['dateOfBirth']),
   createdAt: _timestampFromJson(json['createdAt']),
 );
 
@@ -27,10 +33,17 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
   'referralCode': instance.referralCode,
   'availableUpdates': instance.availableUpdates,
   'referredBy': instance.referredBy,
+  'nickname': instance.nickname,
+  'country': instance.country,
+  'phone': instance.phone,
+  'gender': instance.gender,
+  'address': instance.address,
+  'dateOfBirth': ?_timestampToJson(instance.dateOfBirth),
   'createdAt': ?_timestampToJson(instance.createdAt),
 };
 
 const _$UserRoleEnumMap = {
   UserRole.client: 'client',
   UserRole.worker: 'worker',
+  UserRole.admin: 'admin',
 };

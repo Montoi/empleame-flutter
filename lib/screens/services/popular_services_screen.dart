@@ -1,18 +1,22 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:empleame/data/mock_data.dart';
+import 'package:empleame/data/mock_data.dart'
+    show categories; // Only categories filter is ok to mock for now
+import 'package:empleame/providers/services_provider.dart';
 import 'package:empleame/widgets/home/service_card.dart';
 
-class PopularServicesScreen extends StatefulWidget {
+class PopularServicesScreen extends ConsumerStatefulWidget {
   final String? category;
 
   const PopularServicesScreen({super.key, this.category});
 
   @override
-  State<PopularServicesScreen> createState() => _PopularServicesScreenState();
+  ConsumerState<PopularServicesScreen> createState() =>
+      _PopularServicesScreenState();
 }
 
-class _PopularServicesScreenState extends State<PopularServicesScreen> {
+class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
   late String _selectedCategory;
 
   @override
@@ -23,12 +27,7 @@ class _PopularServicesScreenState extends State<PopularServicesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // Filter services by category
-    final filteredServices = _selectedCategory == 'All'
-        ? popularServices
-        : popularServices
-              .where((s) => s.category == _selectedCategory)
-              .toList();
+    final asyncServices = ref.watch(popularServicesProvider);
 
     final headerTitle = widget.category != null
         ? '${widget.category} Services'
@@ -81,8 +80,16 @@ class _PopularServicesScreenState extends State<PopularServicesScreen> {
 
           // Services List
           Expanded(
-            child: filteredServices.isEmpty
-                ? Center(
+            child: asyncServices.when(
+              data: (activeServices) {
+                final filteredServices = _selectedCategory == 'All'
+                    ? activeServices
+                    : activeServices
+                          .where((s) => s.category == _selectedCategory)
+                          .toList();
+
+                if (filteredServices.isEmpty) {
+                  return Center(
                     child: Text(
                       'No services found',
                       style: TextStyle(
@@ -91,54 +98,64 @@ class _PopularServicesScreenState extends State<PopularServicesScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
-                    itemCount: filteredServices.length,
-                    itemBuilder: (context, index) {
-                      final service = filteredServices[index];
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 16),
-                        child: ServiceCard(
-                          title: service.title,
-                          category: service.category,
-                          provider: service.provider,
-                          price: service.price,
-                          rating: service.rating,
-                          reviews: service.reviewCount,
-                          imageUrl: service.image,
-                          isBookmarked: service.isBookmarked,
-                          onTap: () {
-                            final uri = Uri(
-                              path: '/service-detail',
-                              queryParameters: {
-                                'title': service.title,
-                                'provider': service.provider,
-                                'category': service.category,
-                                'image': service.image,
-                                'price': service.price.toString(),
-                                'rating': service.rating.toString(),
-                                'reviewCount': service.reviewCount.toString(),
-                              },
-                            );
-                            context.push(uri.toString());
-                          },
-                          onBookmark: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  service.isBookmarked
-                                      ? 'Removed from bookmarks'
-                                      : 'Added to bookmarks',
-                                ),
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          },
-                        ),
-                      );
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(24, 16, 24, 40),
+                  itemCount: filteredServices.length,
+                  itemBuilder: (context, index) {
+                    final service = filteredServices[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: ServiceCard(
+                        title: service.title,
+                        category: service.category,
+                        provider: 'Worker Name', // TODO: user table join
+                        price: service.rate,
+                        rating: 5.0, // TODO: store rating
+                        reviews: 0,
+                        imageUrl: service.imageUrls.isNotEmpty
+                            ? service.imageUrls.first
+                            : '',
+                        isBookmarked: false,
+                        onTap: () {
+                          // Secure robust deeplinking
+                          context.push('/service-detail/${service.id}');
+                        },
+                        onBookmark: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Comming soon to live feeds'),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        },
+                      ),
+                    );
+                  },
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 48,
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Failed to load services'),
+                    TextButton(
+                      onPressed: () => ref.invalidate(popularServicesProvider),
+                      child: const Text('Retry'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ],
       ),

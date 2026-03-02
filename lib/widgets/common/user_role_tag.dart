@@ -11,13 +11,25 @@ class UserRoleTag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isWorker = role == UserRole.worker;
+    final String label;
+    final Color bgColor;
 
-    final label = isWorker ? '✦ Trabajador' : '· Cliente';
-    final bgColor = isWorker
-        ? const Color(0xFF7210FF)
-        : const Color(0xFF475569);
-    final textColor = Colors.white;
+    switch (role) {
+      case UserRole.admin:
+        label = '★ Admin';
+        bgColor = const Color(0xFFEF4444); // Red
+        break;
+      case UserRole.worker:
+        label = '✦ Trabajador';
+        bgColor = const Color(0xFF7210FF); // Purple
+        break;
+      case UserRole.client:
+        label = '· Cliente';
+        bgColor = const Color(0xFF475569); // Slate
+        break;
+    }
+
+    const textColor = Colors.white;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),

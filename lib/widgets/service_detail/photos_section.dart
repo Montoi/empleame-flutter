@@ -43,33 +43,67 @@ class PhotosSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          // Staggered 2-column grid
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  children: [
-                    _PhotoTile(url: photos[0], height: 160),
-                    const SizedBox(height: 10),
-                    _PhotoTile(url: photos[2], height: 110),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Column(
-                  children: [
-                    _PhotoTile(url: photos[1], height: 110),
-                    const SizedBox(height: 10),
-                    _PhotoTile(url: photos[3], height: 160),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          // Dynamic layout based on photo count
+          if (photos.isNotEmpty) _buildDynamicGrid(photos),
         ],
       ),
+    );
+  }
+
+  Widget _buildDynamicGrid(List<String> list) {
+    if (list.length == 1) {
+      return _PhotoTile(url: list[0], height: 220);
+    }
+    if (list.length == 2) {
+      return Row(
+        children: [
+          Expanded(child: _PhotoTile(url: list[0], height: 160)),
+          const SizedBox(width: 10),
+          Expanded(child: _PhotoTile(url: list[1], height: 160)),
+        ],
+      );
+    }
+    if (list.length == 3) {
+      return Row(
+        children: [
+          Expanded(child: _PhotoTile(url: list[0], height: 220)),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Column(
+              children: [
+                _PhotoTile(url: list[1], height: 105),
+                const SizedBox(height: 10),
+                _PhotoTile(url: list[2], height: 105),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+    // 4 or more (use staggered 2-column)
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Column(
+            children: [
+              _PhotoTile(url: list[0], height: 160),
+              const SizedBox(height: 10),
+              _PhotoTile(url: list[2], height: 110),
+            ],
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: Column(
+            children: [
+              _PhotoTile(url: list[1], height: 110),
+              const SizedBox(height: 10),
+              _PhotoTile(url: list[3], height: 160),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }

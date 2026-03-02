@@ -4,6 +4,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:empleame/models/service_model.dart';
 import 'package:empleame/providers/my_services_provider.dart';
 import 'package:empleame/screens/worker/service_form_screen.dart';
+import 'package:empleame/screens/services/service_detail_screen.dart';
 
 class MyServicesScreen extends ConsumerWidget {
   const MyServicesScreen({super.key});
@@ -51,23 +52,33 @@ class MyServicesScreen extends ConsumerWidget {
         error: (e, _) => Center(child: Text('Error: $e')),
         data: (services) {
           if (services.isEmpty) {
-            return const _EmptyState();
+            return RefreshIndicator(
+              color: _primary,
+              onRefresh: () async => ref.refresh(myServicesProvider.future),
+              child: Stack(children: [ListView(), const _EmptyState()]),
+            );
           }
-          return ListView.builder(
-            padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-            itemCount: services.length,
-            itemBuilder: (_, i) => _ServiceCard(
-              service: services[i],
-              onEdit: () {
-                ref.read(serviceFormProvider.notifier).loadForEdit(services[i]);
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) => ServiceFormScreen(editing: services[i]),
-                  ),
-                );
-              },
-              onDelete: () => _confirmDelete(context, ref, services[i].id),
+          return RefreshIndicator(
+            color: _primary,
+            onRefresh: () async => ref.refresh(myServicesProvider.future),
+            child: ListView.builder(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+              itemCount: services.length,
+              itemBuilder: (_, i) => _ServiceCard(
+                service: services[i],
+                onEdit: () {
+                  ref
+                      .read(serviceFormProvider.notifier)
+                      .loadForEdit(services[i]);
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => ServiceFormScreen(editing: services[i]),
+                    ),
+                  );
+                },
+                onDelete: () => _confirmDelete(context, ref, services[i].id),
+              ),
             ),
           );
         },
@@ -154,126 +165,140 @@ class _ServiceCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        children: [
-          // Thumbnail
-          ClipRRect(
-            borderRadius: const BorderRadius.horizontal(
-              left: Radius.circular(20),
-            ),
-            child: thumb != null
-                ? CachedNetworkImage(
-                    imageUrl: thumb,
-                    width: 90,
-                    height: 90,
-                    fit: BoxFit.cover,
-                    placeholder: (_, _) => Container(
-                      width: 90,
-                      height: 90,
-                      color: const Color(0xFFF3ECFF),
-                      child: const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
-                      ),
-                    ),
-                    errorWidget: (_, _, _) => Container(
-                      width: 90,
-                      height: 90,
-                      color: const Color(0xFFF3ECFF),
-                      child: const Icon(
-                        Icons.broken_image_outlined,
-                        color: Color(0xFF7210FF),
-                      ),
-                    ),
-                  )
-                : Container(
-                    width: 90,
-                    height: 90,
-                    color: const Color(0xFFF3ECFF),
-                    child: const Icon(
-                      Icons.work_outline,
-                      color: Color(0xFF7210FF),
-                      size: 32,
-                    ),
-                  ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    service.title,
-                    style: const TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFF0F172A),
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    service.category,
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF64748B),
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 3,
-                        ),
-                        decoration: BoxDecoration(
-                          color: _statusColor.withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          _statusLabel,
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.w700,
-                            color: _statusColor,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(20),
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => ServiceDetailScreen(service: service),
+              ),
+            );
+          },
+          child: Row(
+            children: [
+              // Thumbnail
+              ClipRRect(
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(20),
+                ),
+                child: thumb != null
+                    ? CachedNetworkImage(
+                        imageUrl: thumb,
+                        width: 90,
+                        height: 90,
+                        fit: BoxFit.cover,
+                        placeholder: (_, _) => Container(
+                          width: 90,
+                          height: 90,
+                          color: const Color(0xFFF3ECFF),
+                          child: const Center(
+                            child: CircularProgressIndicator(strokeWidth: 2),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      Text(
-                        '\$${service.rate.toStringAsFixed(0)}/h',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF7210FF),
+                        errorWidget: (_, _, _) => Container(
+                          width: 90,
+                          height: 90,
+                          color: const Color(0xFFF3ECFF),
+                          child: const Icon(
+                            Icons.broken_image_outlined,
+                            color: Color(0xFF7210FF),
+                          ),
                         ),
+                      )
+                    : Container(
+                        width: 90,
+                        height: 90,
+                        color: const Color(0xFFF3ECFF),
+                        child: const Icon(
+                          Icons.work_outline,
+                          color: Color(0xFF7210FF),
+                          size: 32,
+                        ),
+                      ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        service.title,
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Color(0xFF0F172A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        service.category,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Color(0xFF64748B),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
+                            decoration: BoxDecoration(
+                              color: _statusColor.withValues(alpha: 0.12),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(
+                              _statusLabel,
+                              style: TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.w700,
+                                color: _statusColor,
+                              ),
+                            ),
+                          ),
+                          const Spacer(),
+                          Text(
+                            '\$${service.rate.toStringAsFixed(0)}/h',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF7210FF),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
+                ),
+              ),
+              // Actions
+              Column(
+                children: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, size: 20),
+                    color: const Color(0xFF7210FF),
+                    onPressed: onEdit,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    color: const Color(0xFFEF4444),
+                    onPressed: onDelete,
+                  ),
                 ],
               ),
-            ),
-          ),
-          // Actions
-          Column(
-            children: [
-              IconButton(
-                icon: const Icon(Icons.edit_outlined, size: 20),
-                color: const Color(0xFF7210FF),
-                onPressed: onEdit,
-              ),
-              IconButton(
-                icon: const Icon(Icons.delete_outline, size: 20),
-                color: const Color(0xFFEF4444),
-                onPressed: onDelete,
-              ),
+              const SizedBox(width: 4),
             ],
           ),
-          const SizedBox(width: 4),
-        ],
+        ),
       ),
     );
   }

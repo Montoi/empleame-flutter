@@ -17,6 +17,9 @@ class ServiceModel {
   /// 'pending_review' | 'active' | 'rejected'
   final String status;
 
+  /// Optional reasoning when an admin rejects a service
+  final String? adminNotes;
+
   final Timestamp? createdAt;
 
   const ServiceModel({
@@ -28,6 +31,7 @@ class ServiceModel {
     required this.workerId,
     this.imageUrls = const [],
     this.status = 'pending_review',
+    this.adminNotes,
     this.createdAt,
   });
 
@@ -44,6 +48,7 @@ class ServiceModel {
       workerId: d['workerId'] as String? ?? '',
       imageUrls: List<String>.from(d['imageUrls'] as List? ?? []),
       status: d['status'] as String? ?? 'pending_review',
+      adminNotes: d['adminNotes'] as String?,
       createdAt: d['createdAt'] as Timestamp?,
     );
   }
@@ -56,6 +61,7 @@ class ServiceModel {
     'workerId': workerId,
     'imageUrls': imageUrls,
     'status': status,
+    if (adminNotes != null) 'adminNotes': adminNotes,
     'createdAt': createdAt ?? FieldValue.serverTimestamp(),
   };
 
@@ -68,6 +74,7 @@ class ServiceModel {
     String? workerId,
     List<String>? imageUrls,
     String? status,
+    String? adminNotes,
     Timestamp? createdAt,
   }) => ServiceModel(
     id: id ?? this.id,
@@ -78,6 +85,7 @@ class ServiceModel {
     workerId: workerId ?? this.workerId,
     imageUrls: imageUrls ?? this.imageUrls,
     status: status ?? this.status,
+    adminNotes: adminNotes ?? this.adminNotes,
     createdAt: createdAt ?? this.createdAt,
   );
 }
