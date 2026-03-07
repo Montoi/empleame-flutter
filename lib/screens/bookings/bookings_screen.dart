@@ -268,132 +268,133 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
     final isExpanded = _expandedId == booking.id;
     final statusConfig = _getStatusConfig(booking.status);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        children: [
-          // Main content
-          Row(
-            children: [
-              // Provider Image
-              ClipRRect(
-                borderRadius: BorderRadius.circular(16),
-                child: Image.network(
-                  booking.providerImage,
-                  width: 80,
-                  height: 80,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 80,
-                      height: 80,
-                      color: Colors.grey.shade300,
-                      child: const Icon(Icons.person, size: 40),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: 16),
-
-              // Booking Info
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      booking.serviceTitle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      booking.providerName,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xFF64748B),
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: statusConfig['bg'] as Color,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        statusConfig['label'] as String,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          color: statusConfig['text'] as Color,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              // Chat Button
-              Container(
-                width: 40,
-                height: 40,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF7210FF).withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.chat_bubble_outline,
-                    color: Color(0xFF7210FF),
-                    size: 20,
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _expandedId = isExpanded ? null : booking.id;
+        });
+      },
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Main content
+            Row(
+              children: [
+                // Provider Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(16),
+                  child: Image.network(
+                    booking.providerImage,
+                    width: 80,
+                    height: 80,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        width: 80,
+                        height: 80,
+                        color: Colors.grey.shade300,
+                        child: const Icon(Icons.person, size: 40),
+                      );
+                    },
                   ),
-                  onPressed: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => ChatScreen(
-                          providerName: booking.providerName,
-                          providerImage: booking.providerImage,
+                ),
+                const SizedBox(width: 16),
+
+                // Booking Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        booking.serviceTitle,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                          color: Color(0xFF0F172A),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        booking.providerName,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xFF64748B),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: statusConfig['bg'] as Color,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          statusConfig['label'] as String,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: statusConfig['text'] as Color,
+                          ),
                         ),
                       ),
-                    );
-                  },
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
 
-          // Expand/Collapse Button
-          InkWell(
-            onTap: () {
-              setState(() {
-                _expandedId = isExpanded ? null : booking.id;
-              });
-            },
-            child: Container(
+                // Chat Button
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7210FF).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.chat_bubble_outline,
+                      color: Color(0xFF7210FF),
+                      size: 20,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => ChatScreen(
+                            providerName: booking.providerName,
+                            providerImage: booking.providerImage,
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+
+            // Expand/Collapse Indicator (card is fully clickable)
+            Container(
               margin: const EdgeInsets.only(top: 16),
               padding: const EdgeInsets.only(top: 16),
               decoration: const BoxDecoration(
@@ -407,34 +408,34 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 size: 24,
               ),
             ),
-          ),
 
-          // Expanded Content
-          if (isExpanded) ...[
-            Container(
-              margin: const EdgeInsets.only(top: 16),
-              padding: const EdgeInsets.only(top: 16),
-              decoration: const BoxDecoration(
-                border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+            // Expanded Content
+            if (isExpanded) ...[
+              Container(
+                margin: const EdgeInsets.only(top: 16),
+                padding: const EdgeInsets.only(top: 16),
+                decoration: const BoxDecoration(
+                  border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
+                ),
+                child: Column(
+                  children: [
+                    _buildExpandedRow(
+                      Icons.calendar_today_outlined,
+                      booking.date,
+                    ),
+                    const SizedBox(height: 12),
+                    _buildExpandedRow(Icons.access_time, booking.time),
+                    const SizedBox(height: 12),
+                    _buildExpandedRow(
+                      Icons.location_on_outlined,
+                      booking.location,
+                    ),
+                  ],
+                ),
               ),
-              child: Column(
-                children: [
-                  _buildExpandedRow(
-                    Icons.calendar_today_outlined,
-                    booking.date,
-                  ),
-                  const SizedBox(height: 12),
-                  _buildExpandedRow(Icons.access_time, booking.time),
-                  const SizedBox(height: 12),
-                  _buildExpandedRow(
-                    Icons.location_on_outlined,
-                    booking.location,
-                  ),
-                ],
-              ),
-            ),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

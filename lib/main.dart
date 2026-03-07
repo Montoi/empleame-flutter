@@ -34,19 +34,39 @@ void main() async {
 
 /// Root widget.
 ///
-/// Watches [localeProvider] to rebuild on locale changes (language switch),
-/// but reads [routerProvider] — a stable cached Provider that is NEVER
-/// recreated, so navigation state survives locale changes.
-class MyApp extends ConsumerWidget {
+/// On first build, syncs [localeProvider] from the locale that
+/// [EasyLocalization] restored from SharedPreferences, then passes it
+/// to [MaterialApp.router]. This makes [localeProvider] the single
+/// driver of the active locale — screens just `ref.watch(localeProvider)`
+/// to rebuild, and [LanguageScreen] updates both easy_localization and
+/// the provider together.
+class MyApp extends ConsumerStatefulWidget {
   const MyApp({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    // Watch localeProvider so MyApp rebuilds when LanguageScreen changes
-    // the locale — cascading the rebuild down to all shell-route screens.
-    // The actual locale text loading is owned by easy_localization (via
-    // context.localizationDelegates + context.setLocale), NOT by this provider.
-    ref.watch(localeProvider);
+  ConsumerState<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends ConsumerState<MyApp> {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Sync localeProvider with whatever locale easy_localization restored
+    // from SharedPreferences (runs before first frame, safe to call here).
+    final savedLocale = context.locale;
+    final providerLocale = ref.read(localeProvider);
+    if (savedLocale != providerLocale) {
+      // Use addPostFrameCallback to avoid modifying provider during build.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(localeProvider.notifier).state = savedLocale;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Watch localeProvider — rebuilds MyApp (and all screens) on locale change.
+    final locale = ref.watch(localeProvider);
 
     // ref.read — stable cached instance, never recreated on rebuilds.
     final router = ref.read(routerProvider);
@@ -54,9 +74,9 @@ class MyApp extends ConsumerWidget {
     return MaterialApp.router(
       title: 'EmpleaMe',
       debugShowCheckedModeBanner: false,
-      // ── i18n: let easy_localization be the SOLE source of truth ──────────
-      // Do NOT pass locale: here — that would override easy_localization's
-      // saved locale from SharedPreferences on every rebuild.
+      // localeProvider drives the active locale; easy_localization provides
+      // the delegates and the translated strings from the JSON assets.
+      locale: locale,
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       theme: ThemeData(
