@@ -42,16 +42,21 @@ class MyApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locale = ref.watch(localeProvider);
+    // Watch localeProvider so MyApp rebuilds when LanguageScreen changes
+    // the locale — cascading the rebuild down to all shell-route screens.
+    // The actual locale text loading is owned by easy_localization (via
+    // context.localizationDelegates + context.setLocale), NOT by this provider.
+    ref.watch(localeProvider);
 
-    // ref.read — we only need the cached, stable instance; not reactive.
+    // ref.read — stable cached instance, never recreated on rebuilds.
     final router = ref.read(routerProvider);
 
     return MaterialApp.router(
       title: 'EmpleaMe',
       debugShowCheckedModeBanner: false,
-      // i18n
-      locale: locale,
+      // ── i18n: let easy_localization be the SOLE source of truth ──────────
+      // Do NOT pass locale: here — that would override easy_localization's
+      // saved locale from SharedPreferences on every rebuild.
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       theme: ThemeData(

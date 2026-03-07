@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/providers/locale_provider.dart';
 import 'package:empleame/screens/chat/chat_screen.dart';
 
 enum BookingStatus { upcoming, completed, cancelled }
@@ -25,14 +28,14 @@ class Booking {
   });
 }
 
-class BookingsScreen extends StatefulWidget {
+class BookingsScreen extends ConsumerStatefulWidget {
   const BookingsScreen({super.key});
 
   @override
-  State<BookingsScreen> createState() => _BookingsScreenState();
+  ConsumerState<BookingsScreen> createState() => _BookingsScreenState();
 }
 
-class _BookingsScreenState extends State<BookingsScreen>
+class _BookingsScreenState extends ConsumerState<BookingsScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
   String? _expandedId;
@@ -114,23 +117,19 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild whenever locale changes so all tr() calls re-evaluate
+    ref.watch(localeProvider);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
         child: Column(
           children: [
-            // Header
             _buildHeader(),
-
-            // Tabs
             _buildTabs(),
-
-            // Bookings List
             Expanded(
               child: TabBarView(
                 controller: _tabController,
-                physics:
-                    const NeverScrollableScrollPhysics(), // Disable swipe to prevent conflict with main navigation
+                physics: const NeverScrollableScrollPhysics(),
                 children: [
                   _buildBookingsList(BookingStatus.upcoming),
                   _buildBookingsList(BookingStatus.completed),
@@ -150,7 +149,6 @@ class _BookingsScreenState extends State<BookingsScreen>
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
         children: [
-          // Logo Badge
           Container(
             width: 40,
             height: 40,
@@ -170,20 +168,15 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
           ),
           const SizedBox(width: 12),
-
-          // Title
-          const Text(
-            'My Bookings',
-            style: TextStyle(
+          Text(
+            tr('bookings.title'),
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F172A),
             ),
           ),
-
           const Spacer(),
-
-          // Icons
           IconButton(
             icon: const Icon(Icons.search, color: Color(0xFF0F172A)),
             onPressed: () {},
@@ -215,13 +208,13 @@ class _BookingsScreenState extends State<BookingsScreen>
         ),
         onTap: (index) {
           setState(() {
-            _expandedId = null; // Close expanded cards when switching tabs
+            _expandedId = null;
           });
         },
-        tabs: const [
-          Tab(text: 'Upcoming'),
-          Tab(text: 'Completed'),
-          Tab(text: 'Cancelled'),
+        tabs: [
+          Tab(text: tr('bookings.upcoming')),
+          Tab(text: tr('bookings.completed')),
+          Tab(text: tr('bookings.cancelled')),
         ],
       ),
     );
@@ -229,6 +222,8 @@ class _BookingsScreenState extends State<BookingsScreen>
 
   Widget _buildBookingsList(BookingStatus status) {
     final bookings = _allBookings.where((b) => b.status == status).toList();
+    // Localized status label for empty state message
+    final statusLabel = _localizedStatusLabel(status);
 
     if (bookings.isEmpty) {
       return Center(
@@ -242,7 +237,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
             const SizedBox(height: 16),
             Text(
-              'No ${status.name} bookings',
+              tr('bookings.emptyTitle', namedArgs: {'status': statusLabel}),
               style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w700,
@@ -251,7 +246,7 @@ class _BookingsScreenState extends State<BookingsScreen>
             ),
             const SizedBox(height: 8),
             Text(
-              'You don\'t have any ${status.name} bookings at the moment',
+              tr('bookings.emptySubtitle', namedArgs: {'status': statusLabel}),
               style: const TextStyle(fontSize: 14, color: Color(0xFF64748B)),
               textAlign: TextAlign.center,
             ),
@@ -463,25 +458,37 @@ class _BookingsScreenState extends State<BookingsScreen>
     );
   }
 
+  /// Returns the localized display label for a booking status.
+  String _localizedStatusLabel(BookingStatus status) {
+    switch (status) {
+      case BookingStatus.upcoming:
+        return tr('bookings.upcoming');
+      case BookingStatus.completed:
+        return tr('bookings.completed');
+      case BookingStatus.cancelled:
+        return tr('bookings.cancelled');
+    }
+  }
+
   Map<String, dynamic> _getStatusConfig(BookingStatus status) {
     switch (status) {
       case BookingStatus.upcoming:
         return {
           'bg': const Color(0xFF7210FF).withValues(alpha: 0.1),
           'text': const Color(0xFF7210FF),
-          'label': 'Upcoming',
+          'label': tr('bookings.upcoming'),
         };
       case BookingStatus.completed:
         return {
           'bg': const Color(0xFF10B981).withValues(alpha: 0.1),
           'text': const Color(0xFF10B981),
-          'label': 'Completed',
+          'label': tr('bookings.completed'),
         };
       case BookingStatus.cancelled:
         return {
           'bg': const Color(0xFFEF4444).withValues(alpha: 0.1),
           'text': const Color(0xFFEF4444),
-          'label': 'Cancelled',
+          'label': tr('bookings.cancelled'),
         };
     }
   }

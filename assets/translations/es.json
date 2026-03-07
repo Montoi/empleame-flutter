@@ -81,5 +81,13 @@
         "genderMale": "Hombre",
         "genderFemale": "Mujer",
         "genderOther": "Otro"
+    },
+    "bookings": {
+        "title": "Mis Reservas",
+        "upcoming": "Próximas",
+        "completed": "Completadas",
+        "cancelled": "Canceladas",
+        "emptyTitle": "Sin reservas {status}",
+        "emptySubtitle": "No tienes reservas {status} en este momento"
     }
 }

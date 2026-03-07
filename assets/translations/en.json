@@ -81,5 +81,13 @@
     "genderMale": "Male",
     "genderFemale": "Female",
     "genderOther": "Other"
+  },
+  "bookings": {
+    "title": "My Bookings",
+    "upcoming": "Upcoming",
+    "completed": "Completed",
+    "cancelled": "Cancelled",
+    "emptyTitle": "No {status} bookings",
+    "emptySubtitle": "You don't have any {status} bookings at the moment"
   }
 }
