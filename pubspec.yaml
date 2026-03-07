@@ -42,6 +42,8 @@ dependencies:
   json_annotation: ^4.9.0
   image_picker: ^1.1.2
   flutter_image_compress: ^2.3.0
+  easy_localization: ^3.0.7
+  shared_preferences: ^2.3.2
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +63,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/translations/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

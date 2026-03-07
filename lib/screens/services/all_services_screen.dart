@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:empleame/data/mock_data.dart';
-import 'package:empleame/utils/icon_mapper.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/config/app_categories.dart';
 import 'package:empleame/widgets/home/service_icon_item.dart';
 
 class AllServicesScreen extends StatelessWidget {
@@ -11,7 +11,7 @@ class AllServicesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('All Services'),
+        title: const Text('Todos los Servicios'),
         actions: [
           IconButton(
             icon: const Icon(Icons.more_horiz, color: Color(0xFF0F172A)),
@@ -57,21 +57,19 @@ class AllServicesScreen extends StatelessWidget {
           mainAxisSpacing: 32,
           childAspectRatio: 0.75,
         ),
-        itemCount: services.where((s) => s.name != 'More').length,
+        itemCount: AppCategories.all.length,
         itemBuilder: (context, index) {
-          final service = services
-              .where((s) => s.name != 'More')
-              .toList()[index];
+          final category = AppCategories.all[index];
           return ServiceIconItem(
-            icon: IconMapper.getIcon(service.icon),
-            label: service.name,
-            color: IconMapper.parseColor(service.iconColor),
+            icon: category.icon,
+            label: tr(category.localizationKey),
+            color: category.color,
             onTap: () {
-              // Navigate to popular services filtered by this category
-              // Using Uri to properly encode parameters (handles special chars like ' & spaces)
+              // Pass the technical ID as query param — locale-independent,
+              // matches correctly against Firestore `category` field.
               final uri = Uri(
                 path: '/popular-services',
-                queryParameters: {'category': service.name},
+                queryParameters: {'category': category.id},
               );
               context.push(uri.toString());
             },

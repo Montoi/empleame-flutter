@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'service_icon_item.dart';
 
 class ServiceData {
+  final String categoryId; // technical id (e.g. 'carpentry') — for navigation
   final IconData icon;
-  final String label;
+  final String label; // localized display text
   final Color color;
 
   const ServiceData({
+    required this.categoryId,
     required this.icon,
     required this.label,
     required this.color,

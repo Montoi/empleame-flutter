@@ -2,26 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:empleame/models/service_model.dart';
 import 'package:empleame/providers/my_services_provider.dart';
 import 'package:empleame/screens/services/service_detail_screen.dart';
-
-// ── Categories — shared with app filters ─────────────────────────────────────
-
-const _kCategories = [
-  'Limpieza',
-  'Plomería',
-  'Electricidad',
-  'Jardinería',
-  'Carpintería',
-  'Pintura',
-  'Tecnología',
-  'Salud',
-  'Educación',
-  'Otros',
-];
+import 'package:empleame/config/app_categories.dart';
 
 class ServiceFormScreen extends ConsumerStatefulWidget {
   final ServiceModel? editing;
@@ -379,8 +366,12 @@ class _CategoryDropdown extends StatelessWidget {
         borderSide: const BorderSide(color: Color(0xFF7210FF), width: 2),
       ),
     ),
-    items: _kCategories
-        .map((c) => DropdownMenuItem(value: c, child: Text(c)))
+    // value = technical id stored in Firestore; label = localized display text
+    items: AppCategories.all
+        .map(
+          (c) =>
+              DropdownMenuItem(value: c.id, child: Text(tr(c.localizationKey))),
+        )
         .toList(),
   );
 }

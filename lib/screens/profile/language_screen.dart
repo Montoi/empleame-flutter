@@ -1,16 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/providers/locale_provider.dart';
 
-class LanguageScreen extends StatefulWidget {
+class LanguageScreen extends ConsumerWidget {
   const LanguageScreen({super.key});
 
-  @override
-  State<LanguageScreen> createState() => _LanguageScreenState();
-}
-
-class _LanguageScreenState extends State<LanguageScreen> {
-  String _selectedLanguage = 'en';
-
-  final List<Map<String, String>> _languages = [
+  static const _languages = [
     {
       'code': 'en',
       'name': 'English',
@@ -21,7 +17,10 @@ class _LanguageScreenState extends State<LanguageScreen> {
   ];
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    // Watch only the languageCode string — selective rebuild per skill reference
+    final currentCode = ref.watch(localeProvider.select((l) => l.languageCode));
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -31,9 +30,9 @@ class _LanguageScreenState extends State<LanguageScreen> {
           icon: const Icon(Icons.arrow_back, color: Color(0xFF0F172A)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Language',
-          style: TextStyle(
+        title: Text(
+          tr('profile.language'),
+          style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
             color: Color(0xFF0F172A),
@@ -62,13 +61,16 @@ class _LanguageScreenState extends State<LanguageScreen> {
             itemCount: _languages.length,
             itemBuilder: (context, index) {
               final language = _languages[index];
-              final isSelected = _selectedLanguage == language['code'];
+              final code = language['code']!;
+              final isSelected = currentCode == code;
 
               return InkWell(
                 onTap: () {
-                  setState(() {
-                    _selectedLanguage = language['code']!;
-                  });
+                  final newLocale = Locale(code);
+                  // Update Riverpod state → MyApp rebuilds with new locale
+                  ref.read(localeProvider.notifier).state = newLocale;
+                  // Also tell easy_localization to load the correct JSON
+                  context.setLocale(newLocale);
                 },
                 child: Container(
                   decoration: BoxDecoration(

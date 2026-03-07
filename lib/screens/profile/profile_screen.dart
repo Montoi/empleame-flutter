@@ -1,6 +1,8 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/providers/locale_provider.dart';
 import 'package:empleame/models/user_model.dart';
 import 'package:empleame/providers/providers.dart';
 import 'package:empleame/screens/profile/edit_profile_screen.dart';
@@ -29,6 +31,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // Rebuild this screen whenever the locale changes so all tr() calls
+    // immediately reflect the new language without navigating away.
+    ref.watch(localeProvider);
     final userAsync = ref.watch(currentUserStreamProvider);
 
     return Scaffold(
@@ -68,8 +73,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                             const SizedBox(height: 8),
                             Text(
                               e.toString().contains('permission')
-                                  ? 'No tienes permiso para ver este perfil.'
-                                  : 'Error al cargar el perfil.',
+                                  ? tr('profile.noPermission')
+                                  : tr('profile.loadError'),
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.red),
                             ),
@@ -82,7 +87,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     _buildDivider(),
                     _buildMenuItem(
                       icon: Icons.person_outline,
-                      title: 'Edit Profile',
+                      title: tr('profile.editProfile'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -96,7 +101,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                         userAsync.valueOrNull?.role.name == 'admin')
                       _buildMenuItem(
                         icon: Icons.work_outline,
-                        title: 'Mis Servicios',
+                        title: tr('profile.myServices'),
                         titleColor: const Color(0xFF7210FF),
                         onTap: () => Navigator.push(
                           context,
@@ -110,7 +115,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     if (userAsync.valueOrNull?.role.name == 'client')
                       _buildMenuItem(
                         icon: Icons.rocket_launch_outlined,
-                        title: 'Conviértete en Trabajador 🚀',
+                        title: tr('profile.becomeWorker'),
                         titleColor: const Color(0xFF7210FF),
                         onTap: () => Navigator.push(
                           context,
@@ -121,7 +126,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                       ),
                     _buildMenuItem(
                       icon: Icons.notifications_outlined,
-                      title: 'Notification',
+                      title: tr('profile.notification'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -131,7 +136,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.account_balance_wallet_outlined,
-                      title: 'Payment',
+                      title: tr('profile.payment'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -141,7 +146,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.shield_outlined,
-                      title: 'Security',
+                      title: tr('profile.security'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -151,8 +156,8 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.language,
-                      title: 'Language',
-                      value: 'English (US)',
+                      title: tr('profile.language'),
+                      value: tr('profile.currentLanguage'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -162,7 +167,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.remove_red_eye_outlined,
-                      title: 'Dark Mode',
+                      title: tr('profile.darkMode'),
                       hasSwitch: true,
                       switchValue: _isDarkMode,
                       onSwitchChanged: (value) =>
@@ -170,7 +175,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.lock_outline,
-                      title: 'Privacy Policy',
+                      title: tr('profile.privacyPolicy'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -180,7 +185,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.help_outline,
-                      title: 'Help Center',
+                      title: tr('profile.helpCenter'),
                       onTap: () => Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -190,32 +195,30 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     ),
                     _buildMenuItem(
                       icon: Icons.people_outline,
-                      title: 'Invite Friends',
+                      title: tr('profile.inviteFriends'),
                       onTap: () {},
                     ),
                     _buildMenuItem(
                       icon: Icons.logout,
-                      title: 'Logout',
+                      title: tr('profile.logout'),
                       isDestructive: true,
                       onTap: () async {
                         final shouldLogout = await showDialog<bool>(
                           context: context,
                           builder: (context) => AlertDialog(
-                            title: const Text('Logout'),
-                            content: const Text(
-                              'Are you sure you want to logout?',
-                            ),
+                            title: Text(tr('profile.logoutTitle')),
+                            content: Text(tr('profile.logoutMessage')),
                             actions: [
                               TextButton(
                                 onPressed: () => Navigator.pop(context, false),
-                                child: const Text('Cancel'),
+                                child: Text(tr('common.cancel')),
                               ),
                               TextButton(
                                 onPressed: () => Navigator.pop(context, true),
                                 style: TextButton.styleFrom(
                                   foregroundColor: const Color(0xFFEF4444),
                                 ),
-                                child: const Text('Logout'),
+                                child: Text(tr('profile.logout')),
                               ),
                             ],
                           ),
@@ -262,10 +265,10 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             ),
           ),
           const SizedBox(width: 12),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Profile',
-              style: TextStyle(
+              tr('profile.title'),
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
                 color: Color(0xFF0F172A),
@@ -348,7 +351,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 8),
         ],
         Text(
-          displayName.isNotEmpty ? displayName : 'Sin nombre',
+          displayName.isNotEmpty ? displayName : tr('common.noName'),
           style: const TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,

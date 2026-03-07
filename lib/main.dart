@@ -1,56 +1,59 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'config/router.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
-import 'services/auth_service.dart';
+import 'providers/locale_provider.dart';
+import 'providers/providers.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await EasyLocalization.ensureInitialized();
+
   SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // dark icons on light bg
-      statusBarBrightness: Brightness.light, // iOS
+      statusBarIconBrightness: Brightness.dark,
+      statusBarBrightness: Brightness.light,
     ),
   );
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
-  runApp(const ProviderScope(child: MyApp()));
+  runApp(
+    EasyLocalization(
+      supportedLocales: const [Locale('en'), Locale('es')],
+      path: 'assets/translations',
+      fallbackLocale: const Locale('en'),
+      child: const ProviderScope(child: MyApp()),
+    ),
+  );
 }
 
-class MyApp extends StatefulWidget {
+/// Root widget.
+///
+/// Watches [localeProvider] to rebuild on locale changes (language switch),
+/// but reads [routerProvider] — a stable cached Provider that is NEVER
+/// recreated, so navigation state survives locale changes.
+class MyApp extends ConsumerWidget {
   const MyApp({super.key});
 
   @override
-  State<MyApp> createState() => _MyAppState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final locale = ref.watch(localeProvider);
 
-class _MyAppState extends State<MyApp> {
-  late final AuthService _authService;
-  late final ValueNotifier<AuthService> authServiceNotifier;
+    // ref.read — we only need the cached, stable instance; not reactive.
+    final router = ref.read(routerProvider);
 
-  @override
-  void initState() {
-    super.initState();
-    _authService = AuthService();
-    authServiceNotifier = ValueNotifier(_authService);
-  }
-
-  @override
-  void dispose() {
-    authServiceNotifier.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'EmpleaMe',
       debugShowCheckedModeBanner: false,
+      // i18n
+      locale: locale,
+      supportedLocales: context.supportedLocales,
+      localizationsDelegates: context.localizationDelegates,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFF7210FF),
@@ -85,7 +88,7 @@ class _MyAppState extends State<MyApp> {
         scaffoldBackgroundColor: const Color(0xFF181A20),
       ),
       themeMode: ThemeMode.light,
-      routerConfig: createRouter(_authService),
+      routerConfig: router,
     );
   }
 }

@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:empleame/data/mock_data.dart'
-    show categories; // Only categories filter is ok to mock for now
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/config/app_categories.dart';
 import 'package:empleame/providers/services_provider.dart';
 import 'package:empleame/widgets/home/service_card.dart';
 
 class PopularServicesScreen extends ConsumerStatefulWidget {
+  /// Technical category ID (e.g. 'carpentry'). Null means "show all".
   final String? category;
 
   const PopularServicesScreen({super.key, this.category});
@@ -17,21 +18,23 @@ class PopularServicesScreen extends ConsumerStatefulWidget {
 }
 
 class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
-  late String _selectedCategory;
+  late String _selectedId;
 
   @override
   void initState() {
     super.initState();
-    _selectedCategory = widget.category ?? 'All';
+    // Default to the incoming category id, or 'all' if none provided.
+    _selectedId = widget.category ?? 'all';
   }
 
   @override
   Widget build(BuildContext context) {
     final asyncServices = ref.watch(popularServicesProvider);
 
-    final headerTitle = widget.category != null
-        ? '${widget.category} Services'
-        : 'Most Popular Services';
+    // Resolve a localized header title from the technical id
+    final headerTitle = _selectedId == 'all'
+        ? tr('filter.all')
+        : tr(AppCategories.byId(_selectedId)?.localizationKey ?? _selectedId);
 
     return Scaffold(
       appBar: AppBar(
@@ -42,27 +45,26 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
       ),
       body: Column(
         children: [
-          // Category Filter Chips
+          // Category Filter Chips — built with ListView.builder (skill: lazy lists)
           SizedBox(
             height: 50,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-              itemCount: categories.length,
+              itemCount: AppCategories.filterIds.length,
               itemBuilder: (context, index) {
-                final category = categories[index];
-                final isSelected = category == _selectedCategory;
+                final id = AppCategories.filterIds[index];
+                final isSelected = id == _selectedId;
+                final label = id == 'all'
+                    ? tr('filter.all')
+                    : tr(AppCategories.byId(id)?.localizationKey ?? id);
 
                 return Padding(
                   padding: const EdgeInsets.only(right: 8),
                   child: FilterChip(
-                    label: Text(category),
+                    label: Text(label),
                     selected: isSelected,
-                    onSelected: (selected) {
-                      setState(() {
-                        _selectedCategory = category;
-                      });
-                    },
+                    onSelected: (_) => setState(() => _selectedId = id),
                     selectedColor: Theme.of(context).colorScheme.primary,
                     labelStyle: TextStyle(
                       color: isSelected
@@ -82,10 +84,11 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
           Expanded(
             child: asyncServices.when(
               data: (activeServices) {
-                final filteredServices = _selectedCategory == 'All'
+                // Filter by technical id — locale-independent
+                final filteredServices = _selectedId == 'all'
                     ? activeServices
                     : activeServices
-                          .where((s) => s.category == _selectedCategory)
+                          .where((s) => s.category == _selectedId)
                           .toList();
 
                 if (filteredServices.isEmpty) {
@@ -106,11 +109,16 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
                   itemCount: filteredServices.length,
                   itemBuilder: (context, index) {
                     final service = filteredServices[index];
+                    // Resolve the translated label for the stored id
+                    final categoryLabel = tr(
+                      AppCategories.byId(service.category)?.localizationKey ??
+                          service.category,
+                    );
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: ServiceCard(
                         title: service.title,
-                        category: service.category,
+                        category: categoryLabel,
                         provider: 'Worker Name', // TODO: user table join
                         price: service.rate,
                         rating: 5.0, // TODO: store rating
@@ -119,10 +127,8 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
                             ? service.imageUrls.first
                             : '',
                         isBookmarked: false,
-                        onTap: () {
-                          // Secure robust deeplinking
-                          context.push('/service-detail/${service.id}');
-                        },
+                        onTap: () =>
+                            context.push('/service-detail/${service.id}'),
                         onBookmark: () {
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(

@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:empleame/providers/providers.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
@@ -93,9 +94,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   Future<void> _updateProfile() async {
     if (_fullNameController.text.trim().isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('El nombre de usuario es obligatorio.'),
-          backgroundColor: Color(0xFFEF4444),
+        SnackBar(
+          content: Text(tr('profile.nameRequired')),
+          backgroundColor: const Color(0xFFEF4444),
         ),
       );
       return;
@@ -132,9 +133,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: const Text(
-              '✅ Profile updated successfully!',
-              style: TextStyle(fontWeight: FontWeight.w700),
+            content: Text(
+              tr('profile.updateSuccess'),
+              style: const TextStyle(fontWeight: FontWeight.w700),
             ),
             backgroundColor: const Color(0xFF10B981),
             behavior: SnackBarBehavior.floating,
@@ -149,7 +150,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('${tr("common.error")}: $e'),
             backgroundColor: const Color(0xFFEF4444),
           ),
         );
@@ -188,9 +189,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         surfaceTintColor: Colors.white,
         elevation: 0,
         leading: const BackButton(color: Color(0xFF0F172A)),
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(
+        title: Text(
+          tr('profile.editProfile'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: Color(0xFF0F172A),
@@ -207,21 +208,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const SizedBox(height: 32),
 
             // Form Fields
-            const _SectionLabel(label: 'Full Name'),
+            _SectionLabel(label: tr('profile.fullName')),
             const SizedBox(height: 8),
-            _AppField(controller: _fullNameController, hint: 'Full Name'),
+            _AppField(
+              controller: _fullNameController,
+              hint: tr('profile.fullName'),
+            ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Nickname'),
+            _SectionLabel(label: tr('profile.nickname')),
             const SizedBox(height: 8),
-            _AppField(controller: _nicknameController, hint: 'Nickname'),
+            _AppField(
+              controller: _nicknameController,
+              hint: tr('profile.nickname'),
+            ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Date of Birth'),
+            _SectionLabel(label: tr('profile.dateOfBirth')),
             const SizedBox(height: 8),
             _AppField(
               controller: _dateOfBirthController,
-              hint: 'Date of Birth',
+              hint: tr('profile.dateOfBirth'),
               suffixIcon: const Icon(
                 Icons.calendar_today_outlined,
                 size: 20,
@@ -246,32 +253,32 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Email'),
+            _SectionLabel(label: tr('profile.email')),
             const SizedBox(height: 8),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9), // darker grey box
+                color: const Color(0xFFF1F5F9),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: _AppField(
                 controller: _emailController,
-                hint: 'Email',
+                hint: tr('profile.email'),
                 suffixIcon: const Icon(
                   Icons.lock_outline,
                   size: 20,
                   color: Color(0xFF94A3B8),
                 ),
                 keyboardType: TextInputType.emailAddress,
-                readOnly: true, // IMMUTABLE
+                readOnly: true,
               ),
             ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Country'),
+            _SectionLabel(label: tr('profile.country')),
             const SizedBox(height: 8),
             _AppField(
               controller: _countryController,
-              hint: 'Country',
+              hint: tr('profile.country'),
               suffixIcon: const Icon(
                 Icons.keyboard_arrow_down,
                 size: 20,
@@ -282,7 +289,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Phone Number (E.164)'),
+            _SectionLabel(label: tr('profile.phoneNumber')),
             const SizedBox(height: 8),
             _AppField(
               controller: _phoneController,
@@ -296,11 +303,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Gender'),
+            _SectionLabel(label: tr('profile.gender')),
             const SizedBox(height: 8),
             _AppField(
               controller: _genderController,
-              hint: 'Gender',
+              hint: tr('profile.gender'),
               suffixIcon: const Icon(
                 Icons.keyboard_arrow_down,
                 size: 20,
@@ -311,11 +318,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             ),
             const SizedBox(height: 20),
 
-            const _SectionLabel(label: 'Address'),
+            _SectionLabel(label: tr('profile.address')),
             const SizedBox(height: 8),
             _AppField(
               controller: _addressController,
-              hint: 'Address',
+              hint: tr('profile.address'),
               maxLines: 3,
             ),
             const SizedBox(height: 48),
@@ -344,9 +351,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                           strokeWidth: 2.5,
                         ),
                       )
-                    : const Text(
-                        'Update',
-                        style: TextStyle(
+                    : Text(
+                        tr('common.update'),
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w800,
                         ),
@@ -433,9 +440,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Select Country',
-              style: TextStyle(
+            Text(
+              tr('profile.selectCountry'),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A),
@@ -477,7 +484,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   void _showGenderPicker() {
-    final genders = ['Male', 'Female', 'Other'];
+    // Build localized gender options at call time
+    final genders = [
+      tr('profile.genderMale'),
+      tr('profile.genderFemale'),
+      tr('profile.genderOther'),
+    ];
 
     showModalBottomSheet(
       context: context,
@@ -490,9 +502,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Text(
-              'Select Gender',
-              style: TextStyle(
+            Text(
+              tr('profile.selectGender'),
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w800,
                 color: Color(0xFF0F172A),

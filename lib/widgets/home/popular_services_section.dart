@@ -2,12 +2,17 @@ import 'package:flutter/material.dart';
 import 'service_card.dart';
 
 class PopularServicesSection extends StatefulWidget {
+  /// List of technical category IDs (e.g. ['all', 'cleaning', ...]).
   final List<String> categories;
+
+  /// Converts a technical ID to its localized display label.
+  final String Function(String id) resolveLabel;
   final List<ServiceCardData> services;
 
   const PopularServicesSection({
     super.key,
     required this.categories,
+    required this.resolveLabel,
     required this.services,
   });
 
@@ -20,12 +25,12 @@ class _PopularServicesSectionState extends State<PopularServicesSection> {
 
   @override
   Widget build(BuildContext context) {
-    final selectedCategory = widget.categories[_selectedIndex];
+    final selectedId = widget.categories[_selectedIndex];
     final filtered =
-        (selectedCategory == 'All'
+        (selectedId == 'all'
                 ? widget.services
                 : widget.services
-                      .where((s) => s.category == selectedCategory)
+                      .where((s) => s.category == selectedId)
                       .toList())
             .take(5)
             .toList();
@@ -45,7 +50,7 @@ class _PopularServicesSectionState extends State<PopularServicesSection> {
                 padding: const EdgeInsets.only(right: 8),
                 child: FilterChip(
                   label: Text(
-                    widget.categories[index],
+                    widget.resolveLabel(widget.categories[index]),
                     style: TextStyle(
                       color: isSelected
                           ? Colors.white

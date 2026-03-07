@@ -1,7 +1,22 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:empleame/models/user_model.dart';
 import 'package:empleame/services/user_repository.dart';
+import 'package:empleame/services/auth_service.dart';
+import 'package:empleame/config/router.dart';
+
+/// Singleton AuthService — lives for the entire app lifetime.
+/// Using a Riverpod Provider guarantees the same instance survives
+/// locale / theme rebuilds and is never recreated.
+final authServiceProvider = Provider<AuthService>((ref) => AuthService());
+
+/// Singleton GoRouter — depends on [authServiceProvider].
+/// Riverpod caches this for the app lifetime, so switching the locale
+/// (which rebuilds MyApp) NEVER creates a fresh router or resets navigation.
+final routerProvider = Provider<GoRouter>(
+  (ref) => createRouter(ref.read(authServiceProvider)),
+);
 
 /// Provides the FirebaseAuth singleton.
 final firebaseAuthProvider = Provider<FirebaseAuth>(
