@@ -89,5 +89,29 @@
         "cancelled": "Canceladas",
         "emptyTitle": "Sin reservas {status}",
         "emptySubtitle": "No tienes reservas {status} en este momento"
+    },
+    "admin": {
+        "title": "Panel de Moderación",
+        "validateServices": "Validar Servicios",
+        "validateServicesDesc": "Revisa y aprueba nuevos servicios publicados.",
+        "validateUsers": "Validar Usuarios (Próximamente)",
+        "validateUsersDesc": "Revisa nuevas solicitudes de verificación de identidad.",
+        "moduleInDev": "Módulo en desarrollo",
+        "error": "Error: {error}",
+        "noServices": "No hay servicios por validar.",
+        "workerId": "Worker ID: {id}"
+    },
+    "referrals": {
+        "title": "Referidos",
+        "inviteFriends": "Invitar Amigos",
+        "totalReferrals": "TOTAL REFERIDOS",
+        "keepGoing": "Sigue así",
+        "thisWeek": "+ 2 esta semana",
+        "target": "Meta: 20",
+        "invitesAvailable": "Invitaciones Disponibles",
+        "left": "restantes",
+        "dailyLimit": "/ límite diario de 10",
+        "completed": "{percent}% completado",
+        "yourCode": "Tu código de invitación"
     }
 }

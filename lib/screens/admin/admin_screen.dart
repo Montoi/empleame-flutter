@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/providers/locale_provider.dart';
 import 'package:empleame/screens/admin/admin_services_screen.dart';
 
-class AdminScreen extends StatelessWidget {
+class AdminScreen extends ConsumerWidget {
   const AdminScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Panel de Moderación',
-          style: TextStyle(
+        title: Text(
+          tr('admin.title'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: Color(0xFF0F172A),
@@ -25,8 +30,8 @@ class AdminScreen extends StatelessWidget {
         padding: const EdgeInsets.all(24),
         children: [
           _AdminMenuCard(
-            title: 'Validar Servicios',
-            subtitle: 'Revisa y aprueba nuevos servicios publicados.',
+            title: tr('admin.validateServices'),
+            subtitle: tr('admin.validateServicesDesc'),
             icon: Icons.work_outline,
             color: const Color(0xFF7210FF),
             onTap: () {
@@ -39,14 +44,14 @@ class AdminScreen extends StatelessWidget {
           const SizedBox(height: 16),
           // Ready for future validations like users, disputes, etc.
           _AdminMenuCard(
-            title: 'Validar Usuarios (Próximamente)',
-            subtitle: 'Revisa nuevas solicitudes de verificación de identidad.',
+            title: tr('admin.validateUsers'),
+            subtitle: tr('admin.validateUsersDesc'),
             icon: Icons.person_outline,
             color: const Color(0xFF64748B),
             onTap: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Módulo en desarrollo')),
-              );
+              ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(tr('admin.moduleInDev'))));
             },
             isLocked: true,
           ),

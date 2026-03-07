@@ -89,5 +89,29 @@
     "cancelled": "Cancelled",
     "emptyTitle": "No {status} bookings",
     "emptySubtitle": "You don't have any {status} bookings at the moment"
+  },
+  "admin": {
+    "title": "Moderation Panel",
+    "validateServices": "Validate Services",
+    "validateServicesDesc": "Review and approve newly published services.",
+    "validateUsers": "Validate Users (Coming Soon)",
+    "validateUsersDesc": "Review new identity verification requests.",
+    "moduleInDev": "Module in development",
+    "error": "Error: {error}",
+    "noServices": "No services to validate.",
+    "workerId": "Worker ID: {id}"
+  },
+  "referrals": {
+    "title": "Referrals",
+    "inviteFriends": "Invite Friends",
+    "totalReferrals": "TOTAL REFERRALS",
+    "keepGoing": "Keep going",
+    "thisWeek": "+ 2 this week",
+    "target": "Target: 20",
+    "invitesAvailable": "Invites Available",
+    "left": "left",
+    "dailyLimit": "/ 10 daily limit",
+    "completed": "{percent}% completed",
+    "yourCode": "Your invitation code"
   }
 }

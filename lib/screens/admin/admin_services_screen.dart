@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:empleame/models/service_model.dart';
+import 'package:empleame/providers/locale_provider.dart';
 import 'package:empleame/providers/my_services_provider.dart';
 import 'package:empleame/screens/services/service_detail_screen.dart';
 
@@ -10,6 +12,7 @@ class AdminServicesScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final pendingAsync = ref.watch(pendingServicesProvider);
 
     return Scaffold(
@@ -18,9 +21,9 @@ class AdminServicesScreen extends ConsumerWidget {
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.white,
         elevation: 0,
-        title: const Text(
-          'Validar Servicios',
-          style: TextStyle(
+        title: Text(
+          tr('admin.validateServices'),
+          style: const TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.w800,
             color: Color(0xFF0F172A),
@@ -30,7 +33,9 @@ class AdminServicesScreen extends ConsumerWidget {
       ),
       body: pendingAsync.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => Center(child: Text('Error: $e')),
+        error: (e, _) => Center(
+          child: Text(tr('admin.error', namedArgs: {'error': e.toString()})),
+        ),
         data: (services) {
           if (services.isEmpty) {
             return RefreshIndicator(
@@ -40,10 +45,10 @@ class AdminServicesScreen extends ConsumerWidget {
               child: Stack(
                 children: [
                   ListView(),
-                  const Center(
+                  Center(
                     child: Text(
-                      'No hay servicios por validar.',
-                      style: TextStyle(
+                      tr('admin.noServices'),
+                      style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF64748B),
@@ -152,7 +157,10 @@ class _AdminServiceCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Worker ID: ${service.workerId}',
+                        tr(
+                          'admin.workerId',
+                          namedArgs: {'id': service.workerId},
+                        ),
                         style: const TextStyle(
                           fontSize: 10,
                           color: Color(0xFF64748B),

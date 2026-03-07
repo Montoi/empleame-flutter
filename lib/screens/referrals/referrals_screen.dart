@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/providers/providers.dart';
+import 'package:empleame/providers/locale_provider.dart';
 import 'dart:math' as math;
 
 class ReferralsScreen extends ConsumerWidget {
@@ -9,6 +11,7 @@ class ReferralsScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(localeProvider);
     final userAsync = ref.watch(currentUserStreamProvider);
     final referralCode = userAsync.valueOrNull?.referralCode ?? '';
     final availableUpdates = userAsync.valueOrNull?.availableUpdates ?? 0;
@@ -54,9 +57,9 @@ class ReferralsScreen extends ConsumerWidget {
             size: 24,
           ),
         ),
-        const Text(
-          'Referrals',
-          style: TextStyle(
+        Text(
+          tr('referrals.title'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: Color(0xFF0F172A),
@@ -106,9 +109,10 @@ class ReferralsScreen extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
-                    'Invite Friends',
-                    style: TextStyle(
+                  child: Text(
+                    tr('referrals.inviteFriends'),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w700,
                       color: Color(0xFF7210FF),
@@ -149,7 +153,7 @@ class ReferralsScreen extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'TOTAL REFERRALS',
+                tr('referrals.totalReferrals'),
                 style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
@@ -169,13 +173,13 @@ class ReferralsScreen extends ConsumerWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                'Keep going',
+                tr('referrals.keepGoing'),
                 style: TextStyle(fontSize: 11, color: Colors.grey[400]),
               ),
               const SizedBox(height: 2),
-              const Text(
-                '+ 2 this week',
-                style: TextStyle(
+              Text(
+                tr('referrals.thisWeek'),
+                style: const TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -191,12 +195,12 @@ class ReferralsScreen extends ConsumerWidget {
                   border: Border.all(color: const Color(0xFFE2E8F0)),
                   borderRadius: BorderRadius.circular(20),
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     Text(
-                      'Target: 20',
-                      style: TextStyle(
+                      tr('referrals.target'),
+                      style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
                         color: Color(0xFF0F172A),
@@ -294,9 +298,9 @@ class ReferralsScreen extends ConsumerWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Invites Available',
-                style: TextStyle(
+              Text(
+                tr('referrals.invitesAvailable'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                   color: Color(0xFF0F172A),
@@ -329,20 +333,20 @@ class ReferralsScreen extends ConsumerWidget {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        'left',
+                        tr('referrals.left'),
                         style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                       ),
                     ],
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '/ 10 daily limit',
+                    tr('referrals.dailyLimit'),
                     style: TextStyle(fontSize: 12, color: Colors.grey[400]),
                   ),
                   const SizedBox(height: 4),
-                  const Text(
-                    '50% completed',
-                    style: TextStyle(
+                  Text(
+                    tr('referrals.completed', namedArgs: {'percent': '50'}),
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                       color: Color(0xFF3B82F6),
@@ -424,9 +428,9 @@ class _ReferralCodeWidgetState extends State<_ReferralCodeWidget> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Tu código de invitación',
-                  style: TextStyle(
+                Text(
+                  tr('referrals.yourCode'),
+                  style: const TextStyle(
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF64748B),
