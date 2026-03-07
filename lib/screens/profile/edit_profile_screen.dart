@@ -589,6 +589,7 @@ class _AppField extends StatelessWidget {
     keyboardType: keyboardType,
     readOnly: readOnly,
     onTap: onTap,
+    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
     style: const TextStyle(fontSize: 15, color: Color(0xFF0F172A)),
     decoration: InputDecoration(
       hintText: hint,

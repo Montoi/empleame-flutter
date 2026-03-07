@@ -19,6 +19,7 @@ class SearchBarWidget extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
       child: TextField(
+        onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
         onChanged: onSearch,
         decoration: InputDecoration(
           hintText: hintText,

@@ -310,6 +310,7 @@ class _AppField extends StatelessWidget {
   Widget build(BuildContext context) => TextFormField(
     controller: controller,
     onChanged: onChanged,
+    onTapOutside: (_) => FocusManager.instance.primaryFocus?.unfocus(),
     maxLines: maxLines,
     keyboardType: keyboardType,
     inputFormatters: inputFormatters,
