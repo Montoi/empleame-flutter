@@ -1,77 +1,31 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/widgets/home/service_card.dart';
+import 'package:empleame/providers/providers.dart';
+import 'package:empleame/providers/services_provider.dart';
+import 'package:empleame/config/app_categories.dart';
 
-class BookmarksScreen extends StatefulWidget {
+class BookmarksScreen extends ConsumerStatefulWidget {
   const BookmarksScreen({super.key});
 
   @override
-  State<BookmarksScreen> createState() => _BookmarksScreenState();
+  ConsumerState<BookmarksScreen> createState() => _BookmarksScreenState();
 }
 
-class _BookmarksScreenState extends State<BookmarksScreen> {
-  final List<String> categories = [
-    'All',
-    'Cleaning',
-    'Repairing',
-    'Painting',
-    'Laundry',
-    'Appliance',
-    'Plumbing',
-    'Shifting',
-  ];
-
+class _BookmarksScreenState extends ConsumerState<BookmarksScreen> {
   int _selectedCategoryIndex = 0;
-
-  // Mock data for bookmarks
-  final List<Map<String, dynamic>> _allBookmarks = [
-    {
-      'title': 'House Cleaning',
-      'category': 'Cleaning',
-      'provider': 'Jenny Wilson',
-      'price': 25.0,
-      'rating': 4.8,
-      'reviews': 820, // 4.8k reviews logic in component
-      'imageUrl': 'https://i.pravatar.cc/300?img=1',
-    },
-    {
-      'title': 'Washing Machine Repair',
-      'category': 'Repairing',
-      'provider': 'Guy Hawkins',
-      'price': 40.0,
-      'rating': 4.7,
-      'reviews': 1200,
-      'imageUrl': 'https://i.pravatar.cc/300?img=2',
-    },
-    {
-      'title': 'Bathroom Cleaning',
-      'category': 'Cleaning',
-      'provider': 'Esther Howard',
-      'price': 30.0,
-      'rating': 4.9,
-      'reviews': 6500, // 6.5k
-      'imageUrl': 'https://i.pravatar.cc/300?img=3',
-    },
-    {
-      'title': 'Kitchen Painting',
-      'category': 'Painting',
-      'provider': 'Robert Fox',
-      'price': 55.0,
-      'rating': 4.6,
-      'reviews': 320,
-      'imageUrl': 'https://i.pravatar.cc/300?img=4',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
-    // Filter logic
-    final currentCategory = categories[_selectedCategoryIndex];
-    final filteredBookmarks = currentCategory == 'All'
-        ? _allBookmarks
-        : _allBookmarks
-              .where((item) => item['category'] == currentCategory)
-              .toList();
+    final bookmarkedAsync = ref.watch(bookmarkedServicesProvider);
+    final user = ref.watch(currentUserStreamProvider).valueOrNull;
+
+    // Filter Logic setup
+    // Index 0 represents "All"
+    // Other indices represent AppCategories.all[index - 1]
+    final categoriesCount = AppCategories.all.length + 1;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA), // Off-white background
@@ -95,9 +49,9 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             ),
           ),
         ),
-        title: const Text(
-          'My Bookmark',
-          style: TextStyle(
+        title: Text(
+          tr('bookmarks.title'),
+          style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w700,
             color: Color(0xFF0F172A),
@@ -135,14 +89,18 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
             child: ListView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               scrollDirection: Axis.horizontal,
-              itemCount: categories.length,
+              itemCount: categoriesCount,
               itemBuilder: (context, index) {
                 final isSelected = _selectedCategoryIndex == index;
+                final label = index == 0
+                    ? tr('bookmarks.all')
+                    : tr(AppCategories.all[index - 1].localizationKey);
+
                 return Padding(
                   padding: const EdgeInsets.only(right: 12),
                   child: FilterChip(
                     label: Text(
-                      categories[index],
+                      label,
                       style: TextStyle(
                         color: isSelected
                             ? Colors.white
@@ -175,8 +133,25 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
 
           // Bookmarks List
           Expanded(
-            child: filteredBookmarks.isEmpty
-                ? Center(
+            child: bookmarkedAsync.when(
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (err, stack) => Center(child: Text('Error: $err')),
+              data: (services) {
+                // Apply filter locally
+                final filteredServices = _selectedCategoryIndex == 0
+                    ? services
+                    : services
+                          .where(
+                            (s) =>
+                                AppCategories.matchCategory(s.category)?.id ==
+                                AppCategories
+                                    .all[_selectedCategoryIndex - 1]
+                                    .id,
+                          )
+                          .toList();
+
+                if (filteredServices.isEmpty) {
+                  return Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -187,7 +162,7 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'No bookmarks yet',
+                          tr('bookmarks.noBookmarks'),
                           style: TextStyle(
                             fontSize: 16,
                             color: Colors.grey[500],
@@ -196,35 +171,48 @@ class _BookmarksScreenState extends State<BookmarksScreen> {
                         ),
                       ],
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
-                    itemCount: filteredBookmarks.length,
-                    itemBuilder: (context, index) {
-                      final item = filteredBookmarks[index];
-                      return ServiceCard(
-                        title: item['title'],
-                        category: item['category'],
-                        provider: item['provider'],
-                        price: item['price'],
-                        rating: item['rating'],
-                        reviews: item['reviews'],
-                        imageUrl: item['imageUrl'],
-                        isBookmarked: true, // Always true for bookmarks screen
-                        onTap: () {
-                          // Handle navigation to details
-                        },
-                        onBookmark: () {
-                          // Handle remove bookmark logic
-                          setState(() {
-                            // In a real app this would update state management
-                            // For mock only:
-                            // _allBookmarks.remove(item); // Don't remove for now to keep demo data
-                          });
-                        },
-                      );
-                    },
-                  ),
+                  );
+                }
+
+                return ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(24, 0, 24, 40),
+                  itemCount: filteredServices.length,
+                  itemBuilder: (context, index) {
+                    final service = filteredServices[index];
+                    final isBookmarked =
+                        user?.savedServices.contains(service.id) ?? false;
+
+                    return ServiceCard(
+                      title: service.title,
+                      category: service.category,
+                      provider: service
+                          .workerId, // Ideally we would fetch the worker's name
+                      price: service.rate,
+                      rating: 4.8, // Mocked until reviews are built
+                      reviews: 120, // Mocked
+                      imageUrl: service.imageUrls.isNotEmpty
+                          ? service.imageUrls.first
+                          : null,
+                      isBookmarked: isBookmarked,
+                      onTap: () {
+                        context.push('/service-detail/${service.id}');
+                      },
+                      onBookmark: () {
+                        if (user != null) {
+                          ref
+                              .read(userRepositoryProvider)
+                              .toggleSavedService(
+                                uid: user.uid,
+                                serviceId: service.id,
+                                save: !isBookmarked,
+                              );
+                        }
+                      },
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ],
       ),

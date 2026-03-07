@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:empleame/data/mock_data.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/models/service_model.dart';
 import 'package:empleame/widgets/service_detail/detail_header.dart';
 import 'package:empleame/widgets/service_detail/info_section.dart';
@@ -56,7 +57,9 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
   Widget _buildContent(ServiceModel? resolvedService, bool isPreview) {
     // Resolved fields — prefer service model, then fallback to mock/defaults
     final String title = resolvedService?.title ?? '';
-    final String provider = 'Tú'; // TODO: Provider lookup based on workerId
+    final String provider = tr(
+      'serviceDetail.you',
+    ); // TODO: Provider lookup based on workerId
     final String category = resolvedService?.category ?? '';
     final double price = resolvedService?.rate ?? 0.0;
     // Mock rating/reviews for now, until added to ServiceModel
@@ -112,18 +115,18 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
                             width: 1.5,
                           ),
                         ),
-                        child: const Row(
+                        child: Row(
                           children: [
-                            Icon(
+                            const Icon(
                               Icons.visibility_outlined,
                               color: Color(0xFFD97706),
                               size: 18,
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                'Vista previa — así verán tu servicio los clientes',
-                                style: TextStyle(
+                                tr('serviceDetail.previewBanner'),
+                                style: const TextStyle(
                                   fontSize: 12,
                                   color: Color(0xFFD97706),
                                   fontWeight: FontWeight.w600,
@@ -205,11 +208,11 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
     return asyncService.when(
       data: (service) {
         if (service == null) {
-          return const Scaffold(
+          return Scaffold(
             body: Center(
               child: Text(
-                'Servicio no encontrado o retirado',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                tr('serviceDetail.notFound'),
+                style: const TextStyle(color: Colors.grey, fontSize: 16),
               ),
             ),
           );
@@ -225,11 +228,11 @@ class _ServiceDetailScreenState extends ConsumerState<ServiceDetailScreen> {
             children: [
               const Icon(Icons.error_outline, color: Colors.red, size: 48),
               const SizedBox(height: 16),
-              const Text('Error al cargar el servicio'),
+              Text(tr('serviceDetail.errorLoading')),
               TextButton(
                 onPressed: () =>
                     ref.invalidate(serviceDetailProvider(widget.serviceId!)),
-                child: const Text('Reintentar'),
+                child: Text(tr('serviceDetail.retry')),
               ),
             ],
           ),
@@ -253,9 +256,9 @@ class _AdminActionTab extends ConsumerWidget {
       await repo.updateServiceStatus(service!.id, 'active');
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Servicio aprobado.'),
-          backgroundColor: Color(0xFF10B981),
+        SnackBar(
+          content: Text(tr('serviceDetail.serviceApproved')),
+          backgroundColor: const Color(0xFF10B981),
         ),
       );
       ref.invalidate(pendingServicesProvider);
@@ -264,7 +267,12 @@ class _AdminActionTab extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Error al aprobar: $e'),
+          content: Text(
+            tr(
+              'serviceDetail.errorApproving',
+              namedArgs: {'error': e.toString()},
+            ),
+          ),
           backgroundColor: const Color(0xFFEF4444),
         ),
       );
@@ -278,19 +286,19 @@ class _AdminActionTab extends ConsumerWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Rechazar Servicio'),
+          title: Text(tr('serviceDetail.rejectServiceDialogTitle')),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('Provee una razón para el rechazo (opcional):'),
+              Text(tr('serviceDetail.rejectReasonPrompt')),
               const SizedBox(height: 12),
               TextField(
                 controller: notesController,
                 maxLines: 3,
-                decoration: const InputDecoration(
-                  hintText: 'Notas del administrador...',
-                  border: OutlineInputBorder(),
+                decoration: InputDecoration(
+                  hintText: tr('serviceDetail.adminNotesHint'),
+                  border: const OutlineInputBorder(),
                 ),
               ),
             ],
@@ -298,14 +306,14 @@ class _AdminActionTab extends ConsumerWidget {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancelar'),
+              child: Text(tr('serviceDetail.cancel')),
             ),
             TextButton(
               onPressed: () => Navigator.pop(context, true),
               style: TextButton.styleFrom(
                 foregroundColor: const Color(0xFFEF4444),
               ),
-              child: const Text('Rechazar'),
+              child: Text(tr('serviceDetail.reject')),
             ),
           ],
         );
@@ -324,9 +332,9 @@ class _AdminActionTab extends ConsumerWidget {
         );
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Servicio rechazado.'),
-            backgroundColor: Color(0xFFF59E0B),
+          SnackBar(
+            content: Text(tr('serviceDetail.serviceRejected')),
+            backgroundColor: const Color(0xFFF59E0B),
           ),
         );
         ref.invalidate(pendingServicesProvider);
@@ -335,7 +343,12 @@ class _AdminActionTab extends ConsumerWidget {
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error al rechazar: $e'),
+            content: Text(
+              tr(
+                'serviceDetail.errorRejecting',
+                namedArgs: {'error': e.toString()},
+              ),
+            ),
             backgroundColor: const Color(0xFFEF4444),
           ),
         );
@@ -385,7 +398,7 @@ class _AdminActionTab extends ConsumerWidget {
                   letterSpacing: 0.2,
                 ),
               ),
-              child: const Text('Rechazar'),
+              child: Text(tr('serviceDetail.reject')),
             ),
           ),
           const SizedBox(width: 12),
@@ -406,7 +419,7 @@ class _AdminActionTab extends ConsumerWidget {
                   letterSpacing: 0.2,
                 ),
               ),
-              child: const Text('Aprobar'),
+              child: Text(tr('serviceDetail.approve')),
             ),
           ),
         ],
@@ -428,9 +441,9 @@ class _LocalPhotosSection extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Fotos y Videos',
-            style: TextStyle(
+          Text(
+            tr('serviceDetail.photosAndVideos'),
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),

@@ -113,5 +113,36 @@
         "dailyLimit": "/ límite diario de 10",
         "completed": "{percent}% completado",
         "yourCode": "Tu código de invitación"
+    },
+    "bookmarks": {
+        "title": "Mis Guardados",
+        "noBookmarks": "Aún no tienes guardados",
+        "all": "Todos"
+    },
+    "serviceDetail": {
+        "you": "Tú",
+        "previewBanner": "Vista previa — así verán tu servicio los clientes",
+        "notFound": "Servicio no encontrado o retirado",
+        "errorLoading": "Error al cargar el servicio",
+        "retry": "Reintentar",
+        "serviceApproved": "Servicio aprobado.",
+        "errorApproving": "Error al aprobar: {error}",
+        "rejectServiceDialogTitle": "Rechazar Servicio",
+        "rejectReasonPrompt": "Provee una razón para el rechazo (opcional):",
+        "adminNotesHint": "Notas del administrador...",
+        "cancel": "Cancelar",
+        "reject": "Rechazar",
+        "serviceRejected": "Servicio rechazado.",
+        "errorRejecting": "Error al rechazar: {error}",
+        "approve": "Aprobar",
+        "photosAndVideos": "Fotos y Videos",
+        "reviewsCount": "{rating} ({count} reseñas)",
+        "basePrice": "(Precio base)",
+        "aboutMe": "Sobre mí",
+        "seeLess": "Ver menos",
+        "readMore": "Leer más...",
+        "seeAll": "Ver todo",
+        "noReviewsFilter": "No hay reseñas para este filtro.",
+        "seeAllReviews": "Ver todas las reseñas"
     }
 }

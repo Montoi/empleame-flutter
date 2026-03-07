@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'app_category.dart';
 
 /// Single Source of Truth for all service categories in the app.
@@ -165,5 +166,32 @@ abstract final class AppCategories {
     } catch (_) {
       return null;
     }
+  }
+
+  /// Attempts to find a matching category by id, localization key, or translated string.
+  /// Useful for handling legacy data where localized names were stored directly in the DB.
+  static AppCategory? matchCategory(String query) {
+    if (query.isEmpty) return null;
+    final qClean = query.toLowerCase().trim();
+
+    // 1. Exact ID match
+    var match = byId(query);
+    if (match != null) return match;
+
+    // 2. Match by current locale translation
+    try {
+      return all.firstWhere(
+        (c) => tr(c.localizationKey).toLowerCase() == qClean,
+      );
+    } catch (_) {}
+
+    // 3. Match by localization key suffix
+    try {
+      return all.firstWhere(
+        (c) => c.localizationKey.split('.').last.toLowerCase() == qClean,
+      );
+    } catch (_) {}
+
+    return null;
   }
 }

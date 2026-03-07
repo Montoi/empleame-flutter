@@ -113,5 +113,36 @@
     "dailyLimit": "/ 10 daily limit",
     "completed": "{percent}% completed",
     "yourCode": "Your invitation code"
+  },
+  "bookmarks": {
+    "title": "My Bookmarks",
+    "noBookmarks": "No bookmarks yet",
+    "all": "All"
+  },
+  "serviceDetail": {
+    "you": "You",
+    "previewBanner": "Preview — this is how clients will see your service",
+    "notFound": "Service not found or removed",
+    "errorLoading": "Error loading service",
+    "retry": "Retry",
+    "serviceApproved": "Service approved.",
+    "errorApproving": "Error approving: {error}",
+    "rejectServiceDialogTitle": "Reject Service",
+    "rejectReasonPrompt": "Provide a reason for rejection (optional):",
+    "adminNotesHint": "Admin notes...",
+    "cancel": "Cancel",
+    "reject": "Reject",
+    "serviceRejected": "Service rejected.",
+    "errorRejecting": "Error rejecting: {error}",
+    "approve": "Approve",
+    "photosAndVideos": "Photos & Videos",
+    "reviewsCount": "{rating} ({count} reviews)",
+    "basePrice": "(Base price)",
+    "aboutMe": "About me",
+    "seeLess": "See less",
+    "readMore": "Read more...",
+    "seeAll": "See all",
+    "noReviewsFilter": "No reviews for this filter.",
+    "seeAllReviews": "See all reviews"
   }
 }

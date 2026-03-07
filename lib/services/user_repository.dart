@@ -148,6 +148,28 @@ class UserRepository {
     }
   }
 
+  /// Adds or removes a service ID from the user's savedServices array.
+  Future<void> toggleSavedService({
+    required String uid,
+    required String serviceId,
+    required bool save,
+  }) async {
+    try {
+      await _users.doc(uid).update({
+        'savedServices': save
+            ? FieldValue.arrayUnion([serviceId])
+            : FieldValue.arrayRemove([serviceId]),
+      });
+    } on FirebaseException catch (e) {
+      if (e.code == 'permission-denied') {
+        throw PermissionDeniedException(
+          'Cannot modify saved services for users/$uid',
+        );
+      }
+      rethrow;
+    }
+  }
+
   /// Creates or overwrites a worker profile in `profiles_worker/{uid}`.
   Future<void> createWorkerProfile(WorkerProfile profile) async {
     try {

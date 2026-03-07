@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
+import 'package:empleame/config/app_categories.dart';
 
 class ServiceCard extends StatelessWidget {
   final String title;
@@ -29,6 +31,11 @@ class ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    final catMeta = AppCategories.matchCategory(category);
+    final displayCategory = catMeta != null
+        ? tr(catMeta.localizationKey)
+        : category;
 
     return InkWell(
       onTap: onTap,
@@ -82,7 +89,7 @@ class ServiceCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(6),
                     ),
                     child: Text(
-                      category,
+                      displayCategory,
                       style: TextStyle(
                         color: Theme.of(context).colorScheme.primary,
                         fontSize: 10,

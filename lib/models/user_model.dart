@@ -44,6 +44,10 @@ class AppUser {
   )
   final DateTime? createdAt;
 
+  /// IDs of services the user has bookmarked.
+  @JsonKey(defaultValue: [])
+  final List<String> savedServices;
+
   const AppUser({
     required this.uid,
     required this.displayName,
@@ -60,6 +64,7 @@ class AppUser {
     this.address,
     this.dateOfBirth,
     this.createdAt,
+    this.savedServices = const [],
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) =>
@@ -96,6 +101,7 @@ class AppUser {
     String? address,
     DateTime? dateOfBirth,
     DateTime? createdAt,
+    List<String>? savedServices,
   }) {
     return AppUser(
       uid: uid,
@@ -113,6 +119,7 @@ class AppUser {
       address: address ?? this.address,
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       createdAt: createdAt ?? this.createdAt,
+      savedServices: savedServices ?? this.savedServices,
     );
   }
 }

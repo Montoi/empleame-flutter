@@ -22,6 +22,11 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
   address: json['address'] as String?,
   dateOfBirth: _timestampFromJson(json['dateOfBirth']),
   createdAt: _timestampFromJson(json['createdAt']),
+  savedServices:
+      (json['savedServices'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
@@ -40,6 +45,7 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
   'address': instance.address,
   'dateOfBirth': ?_timestampToJson(instance.dateOfBirth),
   'createdAt': ?_timestampToJson(instance.createdAt),
+  'savedServices': instance.savedServices,
 };
 
 const _$UserRoleEnumMap = {

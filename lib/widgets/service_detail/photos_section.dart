@@ -1,5 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PhotosSection extends StatelessWidget {
   final List<String> photos;
@@ -21,9 +22,9 @@ class PhotosSection extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Text(
-                'Fotos y Videos',
-                style: TextStyle(
+              Text(
+                tr('serviceDetail.photosAndVideos'),
+                style: const TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w800,
                   color: Color(0xFF0F172A),
@@ -31,9 +32,9 @@ class PhotosSection extends StatelessWidget {
               ),
               TextButton(
                 onPressed: onSeeAll,
-                child: const Text(
-                  'Ver todo',
-                  style: TextStyle(
+                child: Text(
+                  tr('serviceDetail.seeAll'),
+                  style: const TextStyle(
                     color: Color(0xFF7210FF),
                     fontWeight: FontWeight.w800,
                     fontSize: 14,

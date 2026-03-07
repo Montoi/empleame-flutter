@@ -60,6 +60,22 @@ class ServiceRepository {
     return query.docs.map(ServiceModel.fromFirestore).toList();
   }
 
+  /// Fetches multiple services by their IDs, handling Firestore's 10-item whereIn limit.
+  Future<List<ServiceModel>> getServicesByIds(List<String> ids) async {
+    if (ids.isEmpty) return [];
+
+    final List<ServiceModel> results = [];
+    // Firestore 'whereIn' supports a maximum of 10 elements per query.
+    for (var i = 0; i < ids.length; i += 10) {
+      final chunk = ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10);
+      final query = await _services
+          .where(FieldPath.documentId, whereIn: chunk)
+          .get();
+      results.addAll(query.docs.map(ServiceModel.fromFirestore));
+    }
+    return results;
+  }
+
   // ── Writes ────────────────────────────────────────────────────────────────
 
   /// Creates a new service document. Returns the Firestore-assigned [id].

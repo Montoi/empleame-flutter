@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class AboutSection extends StatefulWidget {
   final String text;
@@ -23,9 +24,9 @@ class _AboutSectionState extends State<AboutSection> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Sobre mí',
-            style: TextStyle(
+          Text(
+            tr('serviceDetail.aboutMe'),
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w800,
               color: Color(0xFF0F172A),
@@ -45,7 +46,9 @@ class _AboutSectionState extends State<AboutSection> {
           GestureDetector(
             onTap: () => setState(() => _expanded = !_expanded),
             child: Text(
-              _expanded ? 'Ver menos' : 'Leer más...',
+              _expanded
+                  ? tr('serviceDetail.seeLess')
+                  : tr('serviceDetail.readMore'),
               style: const TextStyle(
                 color: Color(0xFF7210FF),
                 fontWeight: FontWeight.w800,

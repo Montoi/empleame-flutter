@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/config/app_categories.dart';
+import 'package:empleame/providers/providers.dart';
 import 'package:empleame/providers/services_provider.dart';
 import 'package:empleame/widgets/home/service_card.dart';
 
@@ -109,16 +110,17 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
                   itemCount: filteredServices.length,
                   itemBuilder: (context, index) {
                     final service = filteredServices[index];
-                    // Resolve the translated label for the stored id
-                    final categoryLabel = tr(
-                      AppCategories.byId(service.category)?.localizationKey ??
-                          service.category,
-                    );
+                    final user = ref
+                        .watch(currentUserStreamProvider)
+                        .valueOrNull;
+                    final isBookmarked =
+                        user?.savedServices.contains(service.id) ?? false;
+
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 16),
                       child: ServiceCard(
                         title: service.title,
-                        category: categoryLabel,
+                        category: service.category,
                         provider: 'Worker Name', // TODO: user table join
                         price: service.rate,
                         rating: 5.0, // TODO: store rating
@@ -126,16 +128,19 @@ class _PopularServicesScreenState extends ConsumerState<PopularServicesScreen> {
                         imageUrl: service.imageUrls.isNotEmpty
                             ? service.imageUrls.first
                             : '',
-                        isBookmarked: false,
+                        isBookmarked: isBookmarked,
                         onTap: () =>
                             context.push('/service-detail/${service.id}'),
                         onBookmark: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Comming soon to live feeds'),
-                              behavior: SnackBarBehavior.floating,
-                            ),
-                          );
+                          if (user != null) {
+                            ref
+                                .read(userRepositoryProvider)
+                                .toggleSavedService(
+                                  uid: user.uid,
+                                  serviceId: service.id,
+                                  save: !isBookmarked,
+                                );
+                          }
                         },
                       ),
                     );

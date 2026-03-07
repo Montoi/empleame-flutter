@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 const _primary = Color(0xFF7210FF);
 const _primaryLight = Color(0xFFF3ECFF);
@@ -83,7 +84,13 @@ class InfoSection extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '$rating ($reviewCount reseñas)',
+                                tr(
+                                  'serviceDetail.reviewsCount',
+                                  namedArgs: {
+                                    'rating': rating.toString(),
+                                    'count': reviewCount.toString(),
+                                  },
+                                ),
                                 style: const TextStyle(
                                   fontSize: 11,
                                   fontWeight: FontWeight.w700,
@@ -178,9 +185,9 @@ class InfoSection extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 6),
-              const Text(
-                '(Precio base)',
-                style: TextStyle(
+              Text(
+                tr('serviceDetail.basePrice'),
+                style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xFF94A3B8),
                   fontWeight: FontWeight.w600,

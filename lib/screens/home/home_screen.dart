@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/providers/providers.dart';
 import 'package:empleame/providers/services_provider.dart';
+import 'package:empleame/models/user_model.dart';
 import 'package:empleame/models/service_model.dart';
 import 'package:empleame/widgets/common/section_header.dart';
 import 'package:empleame/widgets/home/app_header.dart';
@@ -157,7 +158,9 @@ class HomeScreen extends ConsumerWidget {
                             : tr(AppCategories.byId(id)?.localizationKey ?? id),
                         services: _convertLivePopularServices(
                           context,
+                          ref,
                           services,
+                          user,
                         ),
                       );
                     },
@@ -219,9 +222,13 @@ class HomeScreen extends ConsumerWidget {
 
   List<ServiceCardData> _convertLivePopularServices(
     BuildContext context,
+    WidgetRef ref,
     List<ServiceModel> activeServices,
+    AppUser? user,
   ) {
     return activeServices.map((service) {
+      final isBookmarked = user?.savedServices.contains(service.id) ?? false;
+
       return ServiceCardData(
         title: service.title,
         category: service.category,
@@ -231,13 +238,23 @@ class HomeScreen extends ConsumerWidget {
         rating: 5.0, // TODO: store real rating in ServiceModel
         reviews: 0,
         imageUrl: service.imageUrls.isNotEmpty ? service.imageUrls.first : '',
-        isBookmarked: false,
+        isBookmarked: isBookmarked,
         onTap: () {
           // Navigation logic strictly relies on ID to support deep linking and
           // provider family caching in ServiceDetailScreen
           context.push('/service-detail/${service.id}');
         },
-        onBookmark: () {},
+        onBookmark: () {
+          if (user != null) {
+            ref
+                .read(userRepositoryProvider)
+                .toggleSavedService(
+                  uid: user.uid,
+                  serviceId: service.id,
+                  save: !isBookmarked,
+                );
+          }
+        },
       );
     }).toList();
   }

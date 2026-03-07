@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:empleame/models/home_models.dart';
 import 'package:empleame/screens/services/all_reviews_screen.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 const _primary = Color(0xFF7210FF);
 
@@ -70,7 +71,13 @@ class _ReviewsSectionState extends State<ReviewsSection> {
                   const Icon(Icons.star, size: 20, color: Color(0xFFFFC107)),
                   const SizedBox(width: 8),
                   Text(
-                    '${widget.rating} (${widget.reviewCount} reseñas)',
+                    tr(
+                      'serviceDetail.reviewsCount',
+                      namedArgs: {
+                        'rating': widget.rating.toString(),
+                        'count': widget.reviewCount.toString(),
+                      },
+                    ),
                     style: const TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
@@ -81,9 +88,9 @@ class _ReviewsSectionState extends State<ReviewsSection> {
               ),
               TextButton(
                 onPressed: _openAllReviews,
-                child: const Text(
-                  'Ver todo',
-                  style: TextStyle(
+                child: Text(
+                  tr('serviceDetail.seeAll'),
+                  style: const TextStyle(
                     color: _primary,
                     fontWeight: FontWeight.w800,
                     fontSize: 14,
@@ -147,12 +154,12 @@ class _ReviewsSectionState extends State<ReviewsSection> {
 
           // Up to 5 reviews — uses shared ReviewCard
           if (reviews.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20),
               child: Center(
                 child: Text(
-                  'No hay reseñas para este filtro.',
-                  style: TextStyle(
+                  tr('serviceDetail.noReviewsFilter'),
+                  style: const TextStyle(
                     fontSize: 14,
                     color: Color(0xFF94A3B8),
                     fontWeight: FontWeight.w500,
@@ -182,10 +189,10 @@ class _ReviewsSectionState extends State<ReviewsSection> {
                     border: Border.all(color: const Color(0xFFE2E8F0)),
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Text(
-                    'Ver todas las reseñas',
+                  child: Text(
+                    tr('serviceDetail.seeAllReviews'),
                     textAlign: TextAlign.center,
-                    style: TextStyle(
+                    style: const TextStyle(
                       color: _primary,
                       fontWeight: FontWeight.w800,
                       fontSize: 14,
