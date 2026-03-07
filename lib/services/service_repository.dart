@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:empleame/models/service_model.dart';
 
 class ServiceRepository {
@@ -13,13 +14,23 @@ class ServiceRepository {
   // ── Queries (Futures for Pull-To-Refresh) ──────────────────────────────────
 
   Future<List<ServiceModel>> getWorkerServices(String workerId) async {
-    final query = await _services
-        .where('workerId', isEqualTo: workerId)
-        .where('status', isNotEqualTo: 'deleted')
-        .orderBy('status')
-        .orderBy('createdAt', descending: true)
-        .get();
-    return query.docs.map(ServiceModel.fromFirestore).toList();
+    try {
+      final query = await _services
+          .where('workerId', isEqualTo: workerId)
+          .where('status', isNotEqualTo: 'deleted')
+          .orderBy('status')
+          .orderBy('createdAt', descending: true)
+          .get();
+      return query.docs.map(ServiceModel.fromFirestore).toList();
+    } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        debugPrint(
+          '🔥 Firestore Index Required for getWorkerServices. Please click the link in your console to create it.',
+        );
+        debugPrint(e.message);
+      }
+      rethrow;
+    }
   }
 
   // ── Streams (Live UI Feeds) ───────────────────────────────────────────────
@@ -65,15 +76,26 @@ class ServiceRepository {
     if (ids.isEmpty) return [];
 
     final List<ServiceModel> results = [];
-    // Firestore 'whereIn' supports a maximum of 10 elements per query.
-    for (var i = 0; i < ids.length; i += 10) {
-      final chunk = ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10);
-      final query = await _services
-          .where(FieldPath.documentId, whereIn: chunk)
-          .get();
-      results.addAll(query.docs.map(ServiceModel.fromFirestore));
+    try {
+      // Firestore 'whereIn' supports a maximum of 10 elements per query.
+      for (var i = 0; i < ids.length; i += 10) {
+        final chunk = ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10);
+        final query = await _services
+            .where(FieldPath.documentId, whereIn: chunk)
+            .where('status', isNotEqualTo: 'deleted')
+            .get();
+        results.addAll(query.docs.map(ServiceModel.fromFirestore));
+      }
+      return results;
+    } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        debugPrint(
+          '🔥 Firestore Index Required for getServicesByIds with whereIn + isNotEqualTo. Please click the link in your console to create it.',
+        );
+        debugPrint(e.message);
+      }
+      rethrow;
     }
-    return results;
   }
 
   // ── Writes ────────────────────────────────────────────────────────────────
@@ -114,6 +136,6 @@ class ServiceRepository {
   }
 
   Future<void> deleteService(String id) async {
-    await _services.doc(id).delete();
+    await _services.doc(id).update({'status': 'deleted'});
   }
 }

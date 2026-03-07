@@ -6,13 +6,19 @@ import 'package:empleame/providers/my_services_provider.dart';
 import 'package:empleame/screens/worker/service_form_screen.dart';
 import 'package:empleame/screens/services/service_detail_screen.dart';
 
-class MyServicesScreen extends ConsumerWidget {
+class MyServicesScreen extends ConsumerStatefulWidget {
   const MyServicesScreen({super.key});
 
+  @override
+  ConsumerState<MyServicesScreen> createState() => _MyServicesScreenState();
+}
+
+class _MyServicesScreenState extends ConsumerState<MyServicesScreen> {
   static const _primary = Color(0xFF7210FF);
+  bool _isDeleting = false;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final servicesAsync = ref.watch(myServicesProvider);
 
     return Scaffold(
@@ -61,24 +67,36 @@ class MyServicesScreen extends ConsumerWidget {
           return RefreshIndicator(
             color: _primary,
             onRefresh: () async => ref.refresh(myServicesProvider.future),
-            child: ListView.builder(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
-              itemCount: services.length,
-              itemBuilder: (_, i) => _ServiceCard(
-                service: services[i],
-                onEdit: () {
-                  ref
-                      .read(serviceFormProvider.notifier)
-                      .loadForEdit(services[i]);
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => ServiceFormScreen(editing: services[i]),
+            child: Stack(
+              children: [
+                ListView.builder(
+                  padding: const EdgeInsets.fromLTRB(20, 16, 20, 100),
+                  itemCount: services.length,
+                  itemBuilder: (_, i) => _ServiceCard(
+                    service: services[i],
+                    onEdit: () {
+                      ref
+                          .read(serviceFormProvider.notifier)
+                          .loadForEdit(services[i]);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              ServiceFormScreen(editing: services[i]),
+                        ),
+                      );
+                    },
+                    onDelete: () => _confirmDelete(services[i].id),
+                  ),
+                ),
+                if (_isDeleting)
+                  Container(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    child: const Center(
+                      child: CircularProgressIndicator(color: _primary),
                     ),
-                  );
-                },
-                onDelete: () => _confirmDelete(context, ref, services[i].id),
-              ),
+                  ),
+              ],
             ),
           );
         },
@@ -86,11 +104,7 @@ class MyServicesScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _confirmDelete(
-    BuildContext context,
-    WidgetRef ref,
-    String id,
-  ) async {
+  Future<void> _confirmDelete(String id) async {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -100,7 +114,7 @@ class MyServicesScreen extends ConsumerWidget {
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         content: const Text(
-          'Esta acción es irreversible y eliminará el servicio permanentemente.',
+          '¿Estás seguro de que quieres eliminar este servicio?',
         ),
         actions: [
           TextButton(
@@ -117,8 +131,22 @@ class MyServicesScreen extends ConsumerWidget {
         ],
       ),
     );
-    if (confirmed == true) {
-      await ref.read(serviceRepositoryProvider).deleteService(id);
+    if (confirmed == true && mounted) {
+      setState(() => _isDeleting = true);
+      try {
+        await ref.read(serviceRepositoryProvider).deleteService(id);
+        ref.invalidate(myServicesProvider);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Error al eliminar: $e')));
+        }
+      } finally {
+        if (mounted) {
+          setState(() => _isDeleting = false);
+        }
+      }
     }
   }
 }

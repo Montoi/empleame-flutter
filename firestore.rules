@@ -89,9 +89,18 @@ service cloud.firestore {
       allow create: if isAuthenticated()
                  && request.resource.data.workerId == request.auth.uid;
 
-      // Only the owning worker can update or delete their service.
-      allow update, delete: if isAuthenticated()
-                 && resource.data.workerId == request.auth.uid;
+      // Updating a service: must be the owner.
+      // If 'status' is being changed, the owner can ONLY change it to 'deleted'
+      // or 'pending_review' (for re-submission). NEVER to 'active'.
+      allow update: if isAuthenticated()
+                 && resource.data.workerId == request.auth.uid
+                 && (
+                   !('status' in request.resource.data.diff(resource.data).affectedKeys()) ||
+                   (request.resource.data.status != 'active')
+                 );
+
+      // Physical deletion is fully denied to enforce logical deletion.
+      allow delete: if false;
     }
 
     // ── Deny everything else ──────────────────────────────────────────────────
