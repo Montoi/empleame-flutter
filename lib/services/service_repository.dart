@@ -71,6 +71,35 @@ class ServiceRepository {
     return query.docs.map(ServiceModel.fromFirestore).toList();
   }
 
+  /// Searches for active services using the lowercase title.
+  Future<List<ServiceModel>> searchActiveServices(
+    String query, {
+    int limit = 5,
+  }) async {
+    if (query.trim().isEmpty) return [];
+
+    final q = query.trim().toLowerCase();
+
+    try {
+      final result = await _services
+          .where('status', isEqualTo: 'active')
+          .where('titleLowerCase', isGreaterThanOrEqualTo: q)
+          .where('titleLowerCase', isLessThanOrEqualTo: q + '\uf8ff')
+          .limit(limit)
+          .get();
+
+      return result.docs.map(ServiceModel.fromFirestore).toList();
+    } on FirebaseException catch (e) {
+      if (e.code == 'failed-precondition') {
+        debugPrint(
+          '🔥 Firestore Index Required for searchActiveServices. Please click the link in your console to create it.',
+        );
+        debugPrint(e.message);
+      }
+      rethrow;
+    }
+  }
+
   /// Fetches multiple services by their IDs, handling Firestore's 10-item whereIn limit.
   Future<List<ServiceModel>> getServicesByIds(List<String> ids) async {
     if (ids.isEmpty) return [];
@@ -82,7 +111,7 @@ class ServiceRepository {
         final chunk = ids.sublist(i, i + 10 > ids.length ? ids.length : i + 10);
         final query = await _services
             .where(FieldPath.documentId, whereIn: chunk)
-            .where('status', isNotEqualTo: 'deleted')
+            .where('status', isEqualTo: 'active')
             .get();
         results.addAll(query.docs.map(ServiceModel.fromFirestore));
       }
@@ -112,14 +141,13 @@ class ServiceRepository {
 
   /// Overwrites the mutable fields of an existing service.
   Future<void> updateService(ServiceModel service) async {
-    await _services.doc(service.id).update({
-      'title': service.title,
-      'category': service.category,
-      'description': service.description,
-      'rate': service.rate,
-      'imageUrls': service.imageUrls,
-      'status': service.status,
-    });
+    // Force re-validation: any edit returns the service to pending_review
+    // and clears any previous admin rejection notes.
+    final updatedService = service.copyWith(
+      status: 'pending_review',
+      adminNotes: '',
+    );
+    await _services.doc(service.id).update(updatedService.toMap());
   }
 
   /// Changes the status of a service (used by Admin)

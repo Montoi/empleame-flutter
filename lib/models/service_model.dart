@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 class ServiceModel {
   final String id;
   final String title;
+  final String titleLowerCase;
   final String category;
   final String description;
   final double rate;
@@ -25,6 +26,7 @@ class ServiceModel {
   const ServiceModel({
     required this.id,
     required this.title,
+    this.titleLowerCase = '',
     required this.category,
     required this.description,
     required this.rate,
@@ -42,6 +44,7 @@ class ServiceModel {
     return ServiceModel(
       id: doc.id,
       title: d['title'] as String? ?? '',
+      titleLowerCase: d['titleLowerCase'] as String? ?? '',
       category: d['category'] as String? ?? '',
       description: d['description'] as String? ?? '',
       rate: (d['rate'] as num? ?? 0).toDouble(),
@@ -55,6 +58,7 @@ class ServiceModel {
 
   Map<String, dynamic> toMap() => {
     'title': title,
+    'titleLowerCase': title.toLowerCase(),
     'category': category,
     'description': description,
     'rate': rate,
@@ -68,6 +72,7 @@ class ServiceModel {
   ServiceModel copyWith({
     String? id,
     String? title,
+    String? titleLowerCase,
     String? category,
     String? description,
     double? rate,
@@ -79,6 +84,7 @@ class ServiceModel {
   }) => ServiceModel(
     id: id ?? this.id,
     title: title ?? this.title,
+    titleLowerCase: titleLowerCase ?? this.titleLowerCase,
     category: category ?? this.category,
     description: description ?? this.description,
     rate: rate ?? this.rate,

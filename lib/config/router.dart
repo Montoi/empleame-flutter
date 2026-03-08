@@ -5,6 +5,7 @@ import 'package:empleame/screens/services/all_services_screen.dart';
 import 'package:empleame/screens/services/popular_services_screen.dart';
 import 'package:empleame/screens/services/special_offers_screen.dart';
 import 'package:empleame/screens/services/service_detail_screen.dart';
+import 'package:empleame/screens/services/search_results_screen.dart';
 import 'package:empleame/screens/auth/welcome_screen.dart';
 import 'package:empleame/screens/auth/login_screen.dart';
 import 'package:empleame/screens/auth/sign_up_screen.dart';
@@ -75,6 +76,13 @@ GoRouter createRouter(AuthService authService) {
         builder: (context, state) {
           final id = state.pathParameters['id'] ?? '';
           return ServiceDetailScreen(serviceId: id);
+        },
+      ),
+      GoRoute(
+        path: '/search-results',
+        builder: (context, state) {
+          final query = state.uri.queryParameters['q'] ?? '';
+          return SearchResultsScreen(query: query);
         },
       ),
     ],

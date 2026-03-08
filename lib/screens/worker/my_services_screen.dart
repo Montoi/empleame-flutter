@@ -74,24 +74,34 @@ class _MyServicesScreenState extends ConsumerState<MyServicesScreen> {
                   itemCount: services.length,
                   itemBuilder: (_, i) => _ServiceCard(
                     service: services[i],
-                    onEdit: () {
-                      ref
-                          .read(serviceFormProvider.notifier)
-                          .loadForEdit(services[i]);
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              ServiceFormScreen(editing: services[i]),
-                        ),
-                      );
-                    },
+                    onEdit: services[i].status == 'pending_review'
+                        ? () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text(
+                                  'No puedes editar un servicio que está en validación.',
+                                ),
+                              ),
+                            );
+                          }
+                        : () {
+                            ref
+                                .read(serviceFormProvider.notifier)
+                                .loadForEdit(services[i]);
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (_) =>
+                                    ServiceFormScreen(editing: services[i]),
+                              ),
+                            );
+                          },
                     onDelete: () => _confirmDelete(services[i].id),
                   ),
                 ),
                 if (_isDeleting)
                   Container(
-                    color: Colors.white.withValues(alpha: 0.5),
+                    color: Colors.white.withOpacity(0.5),
                     child: const Center(
                       child: CircularProgressIndicator(color: _primary),
                     ),
@@ -179,6 +189,7 @@ class _ServiceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final thumb = service.imageUrls.isNotEmpty ? service.imageUrls.first : null;
+    final isPending = service.status == 'pending_review';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -187,7 +198,7 @@ class _ServiceCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 2),
           ),
@@ -281,7 +292,7 @@ class _ServiceCard extends StatelessWidget {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: _statusColor.withValues(alpha: 0.12),
+                              color: _statusColor.withOpacity(0.12),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -313,7 +324,9 @@ class _ServiceCard extends StatelessWidget {
                 children: [
                   IconButton(
                     icon: const Icon(Icons.edit_outlined, size: 20),
-                    color: const Color(0xFF7210FF),
+                    color: isPending
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF7210FF),
                     onPressed: onEdit,
                   ),
                   IconButton(
