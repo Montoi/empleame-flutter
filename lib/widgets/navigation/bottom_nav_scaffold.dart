@@ -42,11 +42,7 @@ class _BottomNavScaffoldState extends ConsumerState<BottomNavScaffold> {
   }
 
   void _onNavigationTapped(int index) {
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 300),
-      curve: Curves.easeInOut,
-    );
+    _pageController.jumpToPage(index);
   }
 
   @override
@@ -101,12 +97,12 @@ class _BottomNavScaffoldState extends ConsumerState<BottomNavScaffold> {
       body: PageView(
         controller: _pageController,
         onPageChanged: _onPageChanged,
-        // DragStartBehavior.down: gesture tracking starts from first touch,
-        // so the page settles faster and releases the gesture arena sooner.
-        dragStartBehavior: DragStartBehavior.down,
-        // ClampingScrollPhysics: page snaps sharply with no elastic bounce,
-        // releasing vertical scroll in the new tab immediately.
-        physics: const PageScrollPhysics(parent: ClampingScrollPhysics()),
+        // DragStartBehavior.start (default) delays gesture recognition until
+        // intentional movement is detected, fixing the "sticky swipe" issue.
+        dragStartBehavior: DragStartBehavior.start,
+        // Default PageScrollPhysics without Clamping prevents the gesture
+        // arena from locking vertical scroll prematurely.
+        physics: const PageScrollPhysics(),
         children: screens,
       ),
       bottomNavigationBar: NavigationBar(
