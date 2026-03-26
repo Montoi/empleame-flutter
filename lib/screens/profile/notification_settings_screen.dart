@@ -1,15 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:empleame/providers/providers.dart';
 
-class NotificationSettingsScreen extends StatefulWidget {
+class NotificationSettingsScreen extends ConsumerStatefulWidget {
   const NotificationSettingsScreen({super.key});
 
   @override
-  State<NotificationSettingsScreen> createState() =>
+  ConsumerState<NotificationSettingsScreen> createState() =>
       _NotificationSettingsScreenState();
 }
 
 class _NotificationSettingsScreenState
-    extends State<NotificationSettingsScreen> {
+    extends ConsumerState<NotificationSettingsScreen> {
+  // Local state mirrors Firestore; initialized from currentUserStreamProvider.
+  bool _loaded = false;
   bool _generalNotification = true;
   bool _sound = true;
   bool _vibrate = false;
@@ -23,6 +27,18 @@ class _NotificationSettingsScreenState
 
   @override
   Widget build(BuildContext context) {
+    // Sync local state from Firestore on first load.
+    final userAsync = ref.watch(currentUserStreamProvider);
+    userAsync.whenData((user) {
+      if (!_loaded && user != null) {
+        _loaded = true;
+        // isMuted maps to the master "General Notification" toggle.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) setState(() => _generalNotification = !user.isMuted);
+        });
+      }
+    });
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -33,7 +49,7 @@ class _NotificationSettingsScreenState
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          'Notification',
+          'Notificaciones',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w700,
@@ -45,36 +61,45 @@ class _NotificationSettingsScreenState
       body: ListView(
         padding: const EdgeInsets.fromLTRB(24, 8, 24, 40),
         children: [
-          _buildSettingItem('General Notification', _generalNotification, (
-            value,
-          ) {
-            setState(() => _generalNotification = value);
-          }),
-          _buildSettingItem('Sound', _sound, (value) {
+          // ── Master toggle — persisted as isMuted ──────────────────────────
+          _buildSettingItem(
+            'Notificaciones Generales',
+            _generalNotification,
+            (value) {
+              setState(() => _generalNotification = value);
+              _persistIsMuted(!value); // isMuted is the inverse of the toggle
+            },
+            subtitle: 'Recibir todas las notificaciones de la app',
+          ),
+          _buildSettingItem('Sonido', _sound, (value) {
             setState(() => _sound = value);
           }),
-          _buildSettingItem('Vibrate', _vibrate, (value) {
+          _buildSettingItem('Vibración', _vibrate, (value) {
             setState(() => _vibrate = value);
           }),
-          _buildSettingItem('Special Offers', _specialOffers, (value) {
+          const SizedBox(height: 16),
+          const _SectionHeader(title: 'Alertas'),
+          _buildSettingItem('Ofertas Especiales', _specialOffers, (value) {
             setState(() => _specialOffers = value);
           }),
-          _buildSettingItem('Promo & Discount', _promoDiscount, (value) {
+          _buildSettingItem('Promos y Descuentos', _promoDiscount, (value) {
             setState(() => _promoDiscount = value);
           }),
-          _buildSettingItem('Payments', _payments, (value) {
+          _buildSettingItem('Pagos', _payments, (value) {
             setState(() => _payments = value);
           }),
           _buildSettingItem('Cashback', _cashback, (value) {
             setState(() => _cashback = value);
           }),
-          _buildSettingItem('App Updates', _appUpdates, (value) {
+          const SizedBox(height: 16),
+          const _SectionHeader(title: 'Actualizaciones'),
+          _buildSettingItem('Actualizaciones de App', _appUpdates, (value) {
             setState(() => _appUpdates = value);
           }),
-          _buildSettingItem('New Service Available', _newService, (value) {
+          _buildSettingItem('Nuevo Servicio Disponible', _newService, (value) {
             setState(() => _newService = value);
           }),
-          _buildSettingItem('New Tips Available', _newTips, (value) {
+          _buildSettingItem('Nuevos Consejos', _newTips, (value) {
             setState(() => _newTips = value);
           }),
         ],
@@ -82,25 +107,54 @@ class _NotificationSettingsScreenState
     );
   }
 
+  Future<void> _persistIsMuted(bool isMuted) async {
+    final uid = ref.read(currentUserStreamProvider).valueOrNull?.uid;
+    if (uid == null) return;
+    try {
+      await ref.read(userRepositoryProvider).updateUser(uid, {
+        'isMuted': isMuted,
+      });
+    } catch (e) {
+      debugPrint('NotificationSettingsScreen: failed to persist isMuted: $e');
+    }
+  }
+
   Widget _buildSettingItem(
     String title,
     bool value,
-    ValueChanged<bool> onChanged,
-  ) {
+    ValueChanged<bool> onChanged, {
+    String? subtitle,
+  }) {
     return Container(
       decoration: const BoxDecoration(
         border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
       ),
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF0F172A),
+                  ),
+                ),
+                if (subtitle != null) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      color: Color(0xFF64748B),
+                    ),
+                  ),
+                ],
+              ],
             ),
           ),
           Switch(
@@ -109,6 +163,27 @@ class _NotificationSettingsScreenState
             activeTrackColor: const Color(0xFF7210FF),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _SectionHeader extends StatelessWidget {
+  final String title;
+  const _SectionHeader({required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Text(
+        title,
+        style: const TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w700,
+          color: Color(0xFF64748B),
+          letterSpacing: 0.8,
+        ),
       ),
     );
   }

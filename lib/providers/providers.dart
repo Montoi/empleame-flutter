@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import 'package:empleame/models/user_model.dart';
 import 'package:empleame/services/user_repository.dart';
 import 'package:empleame/services/auth_service.dart';
+import 'package:empleame/services/notification_service.dart';
+import 'package:empleame/services/notification_repository.dart';
 import 'package:empleame/config/router.dart';
 
 /// Singleton AuthService — lives for the entire app lifetime.
@@ -26,6 +28,16 @@ final firebaseAuthProvider = Provider<FirebaseAuth>(
 /// Provides the UserRepository singleton.
 final userRepositoryProvider = Provider<UserRepository>(
   (ref) => UserRepository(),
+);
+
+/// Provides the [NotificationService] singleton.
+final notificationServiceProvider = Provider<NotificationService>(
+  (ref) => NotificationService.instance,
+);
+
+/// Provides the [NotificationRepository] singleton.
+final notificationRepositoryProvider = Provider<NotificationRepository>(
+  (ref) => NotificationRepository(),
 );
 
 /// Reactively watches the Firestore document for the currently signed-in user.

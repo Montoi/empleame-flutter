@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:empleame/models/user_model.dart';
 import 'package:empleame/services/user_repository.dart';
+import 'package:empleame/services/notification_service.dart';
 
 // Google Sign-In Service Class
 class GoogleSignInService {
@@ -67,6 +68,12 @@ class GoogleSignInService {
           .catchError((e) {
             print('GoogleSignInService: Firestore save failed (non-fatal): $e');
           });
+
+      // Save FCM token after Google Sign-In.
+      NotificationService.instance.saveToken(userCredential.user!.uid)
+          .catchError((e) {
+        print('GoogleSignInService: saveToken failed: $e');
+      });
 
       return userCredential;
     } catch (e) {

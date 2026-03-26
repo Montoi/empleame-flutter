@@ -48,6 +48,10 @@ class AppUser {
   @JsonKey(defaultValue: [])
   final List<String> savedServices;
 
+  /// Whether the user has muted all push notifications.
+  @JsonKey(defaultValue: false)
+  final bool isMuted;
+
   const AppUser({
     required this.uid,
     required this.displayName,
@@ -65,6 +69,7 @@ class AppUser {
     this.dateOfBirth,
     this.createdAt,
     this.savedServices = const [],
+    this.isMuted = false,
   });
 
   factory AppUser.fromJson(Map<String, dynamic> json) =>
@@ -102,6 +107,7 @@ class AppUser {
     DateTime? dateOfBirth,
     DateTime? createdAt,
     List<String>? savedServices,
+    bool? isMuted,
   }) {
     return AppUser(
       uid: uid,
@@ -120,6 +126,7 @@ class AppUser {
       dateOfBirth: dateOfBirth ?? this.dateOfBirth,
       createdAt: createdAt ?? this.createdAt,
       savedServices: savedServices ?? this.savedServices,
+      isMuted: isMuted ?? this.isMuted,
     );
   }
 }

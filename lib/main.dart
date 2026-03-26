@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'providers/locale_provider.dart';
 import 'providers/providers.dart';
+import 'services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,15 +23,29 @@ void main() async {
 
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Initialize the NotificationService before runApp so background handlers
+  // are registered and the navigatorKey is available from the first frame.
+  final container = ProviderContainer();
+  await NotificationService.instance.initialize(
+    container: container,
+    navigatorKey: navigatorKey,
+  );
+
   runApp(
     EasyLocalization(
       supportedLocales: const [Locale('en'), Locale('es')],
       path: 'assets/translations',
       fallbackLocale: const Locale('en'),
-      child: const ProviderScope(child: MyApp()),
+      child: ProviderScope(
+        parent: container,
+        child: MyApp(navigatorKey: navigatorKey),
+      ),
     ),
   );
 }
+
+/// Global navigator key for programmatic navigation from NotificationService.
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 /// Root widget.
 ///
@@ -41,7 +56,9 @@ void main() async {
 /// to rebuild, and [LanguageScreen] updates both easy_localization and
 /// the provider together.
 class MyApp extends ConsumerStatefulWidget {
-  const MyApp({super.key});
+  const MyApp({super.key, required this.navigatorKey});
+
+  final GlobalKey<NavigatorState> navigatorKey;
 
   @override
   ConsumerState<MyApp> createState() => _MyAppState();

@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:empleame/models/user_model.dart';
 import 'package:empleame/services/user_repository.dart';
+import 'package:empleame/services/notification_service.dart';
 
 class AuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
@@ -18,10 +19,18 @@ class AuthService {
     required String password,
   }) async {
     try {
-      return await _firebaseAuth.signInWithEmailAndPassword(
+      final credential = await _firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
       );
+      // Save FCM token after successful sign-in.
+      final uid = credential.user?.uid;
+      if (uid != null) {
+        NotificationService.instance.saveToken(uid).catchError(
+          (e) => print('AuthService: saveToken failed: $e'),
+        );
+      }
+      return credential;
     } on FirebaseAuthException catch (e) {
       throw _handleAuthException(e);
     }
@@ -62,6 +71,13 @@ class AuthService {
 
   // Sign out
   Future<void> signOut() async {
+    final uid = currentUser?.uid;
+    // Delete FCM token before signing out so stale tokens don't accumulate.
+    if (uid != null) {
+      await NotificationService.instance.deleteToken(uid).catchError(
+        (e) => print('AuthService: deleteToken failed: $e'),
+      );
+    }
     await _firebaseAuth.signOut();
   }
 

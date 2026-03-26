@@ -27,6 +27,7 @@ AppUser _$AppUserFromJson(Map<String, dynamic> json) => AppUser(
           ?.map((e) => e as String)
           .toList() ??
       [],
+  isMuted: json['isMuted'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
@@ -46,6 +47,7 @@ Map<String, dynamic> _$AppUserToJson(AppUser instance) => <String, dynamic>{
   'dateOfBirth': ?_timestampToJson(instance.dateOfBirth),
   'createdAt': ?_timestampToJson(instance.createdAt),
   'savedServices': instance.savedServices,
+  'isMuted': instance.isMuted,
 };
 
 const _$UserRoleEnumMap = {
