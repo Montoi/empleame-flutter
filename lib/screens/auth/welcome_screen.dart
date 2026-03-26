@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:empleame/services/google_sign_in_service.dart';
+import 'package:empleame/widgets/common/app_image.dart';
 
 class WelcomeScreen extends StatefulWidget {
   const WelcomeScreen({super.key});
@@ -90,54 +91,11 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                       ),
                       padding: const EdgeInsets.all(4),
                       child: ClipOval(
-                        child: Image.network(
-                          'https://lh3.googleusercontent.com/aida-public/AB6AXuB_JnQktbRyxDn0amrHLi0tOYJcevJVqA69eSiM5YjayH7MMyNYpxX-yTfGDEbgg_29GHz9d0oEoH8qeyCoeSt3GEwYACzocmGLHIPc94l3QlnBM1eWjYPateTWC3hgEEnfyikUlzuLFHH9wuL0D-vAJ_eo2CEdSDodojb4TMPboTzGnK3Lu5F3VU1H_xXmNXRCIQT4eMHp6jEoLRTkkYPOMrlj0yJoccEcrfEKRENNfUijGLIFsJw-NWveGqbFpkXz7a5q0ehsglPO',
+                        child: const AppImage(
+                          imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuB_JnQktbRyxDn0amrHLi0tOYJcevJVqA69eSiM5YjayH7MMyNYpxX-yTfGDEbgg_29GHz9d0oEoH8qeyCoeSt3GEwYACzocmGLHIPc94l3QlnBM1eWjYPateTWC3hgEEnfyikUlzuLFHH9wuL0D-vAJ_eo2CEdSDodojb4TMPboTzGnK3Lu5F3VU1H_xXmNXRCIQT4eMHp6jEoLRTkkYPOMrlj0yJoccEcrfEKRENNfUijGLIFsJw-NWveGqbFpkXz7a5q0ehsglPO',
                           width: 216,
                           height: 216,
                           fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              width: 216,
-                              height: 216,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: primaryColor.withValues(alpha: 0.1),
-                              ),
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value:
-                                      loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded /
-                                            loadingProgress.expectedTotalBytes!
-                                      : null,
-                                  color: primaryColor,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) {
-                            return Container(
-                              width: 216,
-                              height: 216,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                gradient: LinearGradient(
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                  colors: [
-                                    primaryColor.withValues(alpha: 0.15),
-                                    primaryColor.withValues(alpha: 0.05),
-                                  ],
-                                ),
-                              ),
-                              child: Icon(
-                                Icons.people_alt_rounded,
-                                size: 100,
-                                color: primaryColor,
-                              ),
-                            );
-                          },
                         ),
                       ),
                     ),

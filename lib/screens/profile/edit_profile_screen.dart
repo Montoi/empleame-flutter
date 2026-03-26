@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:empleame/services/storage_service.dart';
+import 'package:empleame/widgets/common/app_image.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -104,14 +106,22 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
     setState(() => _isSaving = true);
 
+    String? newlyUploadedPhoto;
+
     try {
       final user = ref.read(firebaseAuthProvider).currentUser;
       if (user == null) return;
 
-      // 1. Update Firebase Auth displayName (syncs header)
+      // 1. Storage Upload
+      if (_localImage != null) {
+        final storage = StorageService();
+        newlyUploadedPhoto = await storage.uploadProfileImage(user.uid, _localImage!);
+      }
+
+      // 2. Update Firebase Auth displayName (syncs header)
       await user.updateDisplayName(_fullNameController.text.trim());
 
-      // 2. Atomic Update on Firestore
+      // 3. Atomic Update on Firestore
       final updateData = <String, dynamic>{
         'displayName': _fullNameController.text.trim(),
         'nickname': _nicknameController.text.trim(),
@@ -123,6 +133,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
       if (_selectedDob != null) {
         updateData['dateOfBirth'] = Timestamp.fromDate(_selectedDob!);
+      }
+      
+      if (newlyUploadedPhoto != null) {
+        updateData['photoUrl'] = newlyUploadedPhoto;
+        await user.updatePhotoURL(newlyUploadedPhoto);
       }
 
       await FirebaseFirestore.instance
@@ -147,6 +162,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
+      // 🚨 Rollback: Si subimos imagen pero el Firestore falló, borrar huérfano.
+      if (newlyUploadedPhoto != null) {
+        await StorageService().deleteImageByUrl(newlyUploadedPhoto);
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -368,13 +388,20 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   }
 
   Widget _buildAvatarSection() {
-    ImageProvider avatarImage;
+    Widget avatarWidget;
+    
     if (_localImage != null) {
-      avatarImage = FileImage(_localImage!);
+      avatarWidget = Image.file(_localImage!, fit: BoxFit.cover);
     } else if (_currentPhotoUrl != null && _currentPhotoUrl!.isNotEmpty) {
-      avatarImage = NetworkImage(_currentPhotoUrl!);
+      avatarWidget = AppImage(
+        imageUrl: _currentPhotoUrl,
+        fit: BoxFit.cover,
+      );
     } else {
-      avatarImage = const NetworkImage('https://i.pravatar.cc/300?img=33');
+      avatarWidget = const AppImage(
+        imageUrl: 'https://i.pravatar.cc/300?img=33',
+        fit: BoxFit.cover,
+      );
     }
 
     return Center(
@@ -385,11 +412,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             Container(
               width: 120,
               height: 120,
+              clipBehavior: Clip.hardEdge,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 4),
-                image: DecorationImage(image: avatarImage, fit: BoxFit.cover),
               ),
+              child: avatarWidget,
             ),
             Positioned(
               bottom: 4,

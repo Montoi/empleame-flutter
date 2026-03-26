@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:empleame/providers/locale_provider.dart';
 import 'package:empleame/screens/chat/chat_screen.dart';
+import 'package:empleame/widgets/common/app_image.dart';
 
 enum BookingStatus { upcoming, completed, cancelled }
 
@@ -298,19 +299,11 @@ class _BookingsScreenState extends ConsumerState<BookingsScreen>
                 // Provider Image
                 ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: Image.network(
-                    booking.providerImage,
+                  child: AppImage(
+                    imageUrl: booking.providerImage,
                     width: 80,
                     height: 80,
                     fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 80,
-                        height: 80,
-                        color: Colors.grey.shade300,
-                        child: const Icon(Icons.person, size: 40),
-                      );
-                    },
                   ),
                 ),
                 const SizedBox(width: 16),

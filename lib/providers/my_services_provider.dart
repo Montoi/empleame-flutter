@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:empleame/models/service_model.dart';
 import 'package:empleame/providers/providers.dart';
 import 'package:empleame/services/service_repository.dart';
+import 'package:empleame/services/storage_service.dart';
 
 // ── Repository provider ──────────────────────────────────────────────────────
 
@@ -112,56 +113,60 @@ class ServiceFormNotifier extends StateNotifier<ServiceFormState> {
     if (!state.isValid) return null;
     state = state.copyWith(isSaving: true);
 
-    try {
-      // ── Placeholder image URLs (Spark plan) ─────────────────────────────
-      // Each local photo gets a picsum placeholder so the Firestore doc has
-      // at least one image URL even without Firebase Storage.
-      final placeholders = state.localImages.isEmpty
-          ? ['https://picsum.photos/seed/$_workerId/400/300']
-          : List.generate(
-              state.localImages.length,
-              (i) => 'https://picsum.photos/seed/${_workerId}_$i/400/300',
-            );
+    final isNew = state.editing == null;
+    final String serviceId = isNew ? _repo.generateServiceId() : state.editing!.id;
+    final uploadedUrls = <String>[];
 
-      // --- STORAGE UPLOAD (uncomment when Blaze plan active) ---------------
-      // final storageRef = FirebaseStorage.instance.ref('services/$workerId');
-      // final uploadedUrls = <String>[];
-      // for (int i = 0; i < state.localImages.length; i++) {
-      //   final compressed = await FlutterImageCompress.compressAndGetFile(
-      //     state.localImages[i].absolute.path,
-      //     '${state.localImages[i].path}_compressed.jpg',
-      //     quality: 75,
-      //   );
-      //   final file = compressed ?? state.localImages[i];
-      //   final task = storageRef.child('$i.jpg').putFile(file);
-      //   final snap = await task;
-      //   uploadedUrls.add(await snap.ref.getDownloadURL());
-      // }
-      // final imageUrls = uploadedUrls;
-      // -----------------------------------------------------------------------
+    try {
+      // 1. Upload Images to Storage
+      // If we are editing, we currently start with no new logic for keeping old ones (would append or replace). 
+      // For now, we assume localImages are the final intended list.
+      if (state.localImages.isNotEmpty) {
+        final storage = StorageService();
+        for (int i = 0; i < state.localImages.length; i++) {
+          final url = await storage.uploadServiceImage(serviceId, state.localImages[i], i);
+          if (url != null) {
+            uploadedUrls.add(url);
+          }
+        }
+      }
+
+      // Handle edited items that might have pre-existing URLs
+      final currentUrls = state.editing?.imageUrls ?? [];
+      final finalUrls = [...currentUrls, ...uploadedUrls];
+      
+      // Fallback if no images were provided (using a placeholder)
+      if (finalUrls.isEmpty) {
+        finalUrls.add('https://picsum.photos/seed/$_workerId/400/300');
+      }
 
       final model = ServiceModel(
-        id: state.editing?.id ?? '',
+        id: serviceId,
         title: state.title.trim(),
         category: state.category,
         description: state.description.trim(),
         rate: double.parse(state.rate),
         workerId: _workerId,
-        imageUrls: placeholders,
+        imageUrls: finalUrls,
         status: 'pending_review',
       );
 
-      String id;
-      if (state.editing != null) {
-        await _repo.updateService(model.copyWith(id: state.editing!.id));
-        id = state.editing!.id;
+      // 2. Save to Firestore
+      if (!isNew) {
+        await _repo.updateService(model);
       } else {
-        id = await _repo.createService(model);
+        await _repo.createServiceWithId(serviceId, model);
       }
 
       state = state.copyWith(isSaving: false);
-      return id;
+      return serviceId;
     } catch (e) {
+      // 🚨 Rollback: Si los datos fallaron al guardar en Firestore (e.g timeout/reglas de seguridad)
+      // Iteramos y borramos las imagenes huerfanas subidas en este intento.
+      for (final url in uploadedUrls) {
+        await StorageService().deleteImageByUrl(url);
+      }
+
       state = state.copyWith(isSaving: false, error: e.toString());
       return null;
     }

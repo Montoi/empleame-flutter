@@ -129,6 +129,20 @@ class ServiceRepository {
 
   // ── Writes ────────────────────────────────────────────────────────────────
 
+  /// Generates a new unique Document ID before actually creating the document.
+  /// Useful to name Storage references correctly before saving to Firestore.
+  String generateServiceId() {
+    return _services.doc().id;
+  }
+
+  /// Creates a new service document using an explicit pre-generated [id].
+  Future<void> createServiceWithId(String id, ServiceModel service) async {
+    await _services.doc(id).set({
+      ...service.toMap(),
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   /// Creates a new service document. Returns the Firestore-assigned [id].
   Future<String> createService(ServiceModel service) async {
     final ref = _services.doc();

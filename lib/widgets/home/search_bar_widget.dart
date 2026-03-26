@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:empleame/providers/services_provider.dart';
+import 'package:empleame/widgets/common/app_image.dart';
 
 class SearchBarWidget extends ConsumerStatefulWidget {
   final VoidCallback? onFilterTap;
@@ -202,8 +203,8 @@ class _SearchBarWidgetState extends ConsumerState<SearchBarWidget> {
                       ClipRRect(
                         borderRadius: BorderRadius.circular(8),
                         child: service.imageUrls.isNotEmpty
-                            ? Image.network(
-                                service.imageUrls.first,
+                            ? AppImage(
+                                imageUrl: service.imageUrls.first,
                                 width: 48,
                                 height: 48,
                                 fit: BoxFit.cover,
